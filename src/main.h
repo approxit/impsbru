@@ -1,4 +1,0 @@
-#ifndef GUARD_IMPSBRU_MAIN_H
-#define GUARD_IMPSBRU_MAIN_H
-
-#endif
