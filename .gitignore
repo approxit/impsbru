@@ -1,5 +1,3 @@
-Thumbs.db
-*.idea
-*.o
-*.log
-*.vscode
+/.idea
+/bin
+/build

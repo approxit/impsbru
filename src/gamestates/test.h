@@ -1,8 +1,10 @@
 #ifndef GUARD_IMPSBRU_GAMESTATES_TEST_H
 #define GUARD_IMPSBRU_GAMESTATES_TEST_H
 
-void gsTestCreate(void);
-void gsTestLoop(void);
-void gsTestDestroy(void);
+#include <ace/types.h>
+
+void gsTestCreate();
+void gsTestLoop();
+void gsTestDestroy();
 
 #endif
