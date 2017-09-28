@@ -1,0 +1,1 @@
+palette_conv.exe impsbru.act ../data/impsbru.plt
