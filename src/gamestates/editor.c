@@ -37,6 +37,8 @@ void gsEditorCreate() {
 	createCrossAtlas();
 	createEditorStepAtlas();
 
+	loadMapFromFile("/data/maps/1.map");
+
 	drawEditorStep();
 	drawMap();
 	drawCursor();

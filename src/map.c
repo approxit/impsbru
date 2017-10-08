@@ -5,11 +5,7 @@
 #include "cross.h"
 #include "game.h"
 
-UBYTE g_pMapData[MAP_WIDTH][MAP_HEIGHT] = {
-	CROSS_SIDE_C_BIT |
-	CROSS_SIDE_D_BIT
-};
-
+UBYTE g_pMapData[MAP_WIDTH][MAP_HEIGHT] = {0};
 BYTE g_pMapCursorShifts[2][CROSS_SIDE_COUNT][2] = {
 	{
    		{0, -1}, // N
