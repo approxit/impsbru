@@ -5,25 +5,49 @@
 #include <ace/types.h>
 #include <ace/generic/main.h>
 #include <ace/managers/game.h>
-#include <ace/managers/joy.h>
+#include <ace/managers/viewport/simplebuffer.h>
+#include <ace/utils/extview.h>
+#include <ace/utils/palette.h>
 
-#include "gamestates/test.h"
+#include "gamestates/editor.h"
 
 const UWORD WINDOW_SCREEN_WIDTH = 320;
 const UWORD WINDOW_SCREEN_HEIGHT = 256;
 const UWORD WINDOW_SCREEN_BPP = 4;
 
-void genericCreate(void) {
-	joyOpen();
+tView *g_pView;
+tVPort *g_pVPort;
+tSimpleBufferManager *g_pBufferManager;
 
-	gamePushState(gsTestCreate, gsTestLoop, gsTestDestroy);
+void genericCreate() {
+	g_pView = (tView *) viewCreate(0,
+		TAG_VIEW_GLOBAL_CLUT, 1,
+		TAG_DONE
+	);
+
+	g_pVPort = vPortCreate(0,
+		TAG_VPORT_VIEW, g_pView,
+		TAG_DONE
+	);
+
+	g_pBufferManager = simpleBufferCreate(0,
+		TAG_SIMPLEBUFFER_VPORT, g_pVPort,
+		TAG_DONE
+	);
+
+	paletteLoad("/data/impsbru.plt", g_pVPort->pPalette, 1 << WINDOW_SCREEN_BPP);
+
+	viewLoad(g_pView);
+
+	gamePushState(gsEditorCreate, gsEditorLoop, gsEditorDestroy);
 }
 
-void genericProcess(void) {
+void genericProcess() {
 	keyProcess();
-	joyProcess();
+	gameProcess();
+	WaitTOF();
 }
 
-void genericDestroy(void) {
-	joyClose();
+void genericDestroy() {
+	viewDestroy(g_pView);
 }
