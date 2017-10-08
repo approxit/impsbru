@@ -25,6 +25,8 @@ void genericCreate() {
 		TAG_DONE
 	);
 
+	copBlockDisableSprites(g_pView->pCopList, 0xFF);
+
 	g_pVPort = vPortCreate(0,
 		TAG_VPORT_VIEW, g_pView,
 		TAG_DONE

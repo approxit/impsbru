@@ -6,8 +6,8 @@
 
 #include "config.h"
 
-extern tBitMap *g_pCrossBitMapAtlas[ATLAS_COUNT];
-extern tBitmapMask *g_pCrossBitMapMaskAtlas[ATLAS_COUNT];
+extern tBitMap *g_pCrossBitMapAtlas[CROSS_ATLAS_SIZE];
+extern tBitmapMask *g_pCrossBitMapMaskAtlas[CROSS_ATLAS_SIZE];
 
 UBYTE getCrossSideState(
 	IN UBYTE ubCrossData,

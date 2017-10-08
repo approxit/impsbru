@@ -8,9 +8,10 @@
 #include "game.h"
 #include "cross.h"
 #include "map.h"
+#include "atlas.h"
 
-static UBYTE g_ubMapCursorX = 0;
-static UBYTE g_ubMapCursorY = 0;
+static UBYTE s_ubMapCursorX = 0;
+static UBYTE s_ubMapCursorY = 0;
 static UBYTE s_pKeysForCrossSide[CROSS_SIDE_COUNT] = {
 	KEY_W, // N
 	KEY_E, // NE
@@ -27,29 +28,24 @@ static UBYTE s_pKeysForMapCursor[CROSS_SIDE_COUNT] = {
 	KEY_M, // SW
 	KEY_U // NW
 };
+static UBYTE s_ubEditorStep = EDITOR_STEP_CREATE;
+static tBitMap *s_pEditorStepBitMapAtlas[EDITOR_STEP_ATLAS_SIZE] = {0};
 
 void gsEditorCreate() {
 	logWrite("gsEditorCreate\n");
 
 	createCrossAtlas();
+	createEditorStepAtlas();
 
-//	blitRect(
-//		g_pBufferManager->pBuffer, 0, 0,
-//		WINDOW_SCREEN_WIDTH, WINDOW_SCREEN_HEIGHT,
-//		2
-//	);
-
+	drawEditorStep();
 	drawMap();
 	drawCursor();
 }
 
 void gsEditorLoop() {
-	if (keyUse(KEY_ESCAPE)) {
-		gameClose();
-	}
-
 	handleMapEditActions();
 	handleMapCursorActions();
+	handleEditorStepActions();
 	handleMapLoadSaveActions();
 }
 
@@ -57,17 +53,30 @@ void gsEditorDestroy() {
 	logWrite("gsEditorDestroy\n");
 
 	destroyCrossAtlas();
+	destroyEditorStepAtlas();
+}
+
+void createEditorStepAtlas() {
+	createAtlasFile(s_pEditorStepBitMapAtlas, EDITOR_STEP_CREATE, "/data/editor_frames/create.bm");
+	createAtlasFile(s_pEditorStepBitMapAtlas, EDITOR_STEP_START_POINT, "/data/editor_frames/start_point.bm");
+	createAtlasFile(s_pEditorStepBitMapAtlas, EDITOR_STEP_DESTINATION_POINT, "/data/editor_frames/destination_point.bm");
+	createAtlasFile(s_pEditorStepBitMapAtlas, EDITOR_STEP_PLAY_TEST, "/data/editor_frames/play_test.bm");
+	createAtlasFile(s_pEditorStepBitMapAtlas, EDITOR_STEP_SHARE, "/data/editor_frames/share.bm");
+}
+
+void destroyEditorStepAtlas() {
+	destroyAtlasFiles(s_pEditorStepBitMapAtlas, EDITOR_STEP_ATLAS_SIZE);
 }
 
 void handleMapEditActions() {
 	for (UBYTE ubKeyIndex = 0; ubKeyIndex < CROSS_SIDE_COUNT; ++ubKeyIndex) {
 		if (keyUse(s_pKeysForCrossSide[ubKeyIndex])) {
-			BYTE ubCursorX = getMapNeighborXRestrictive(g_ubMapCursorX, ubKeyIndex);
-			BYTE ubCursorY = getMapNeighborYRestrictive(g_ubMapCursorX, g_ubMapCursorY, ubKeyIndex);
+			BYTE ubCursorX = getMapNeighborXRestrictive(s_ubMapCursorX, ubKeyIndex);
+			BYTE ubCursorY = getMapNeighborYRestrictive(s_ubMapCursorX, s_ubMapCursorY, ubKeyIndex);
 
 			if ((ubCursorX != MAP_WIDTH) && (ubCursorY != MAP_HEIGHT)) {
-				toggleCrossSideState(g_ubMapCursorX, g_ubMapCursorY, ubKeyIndex);
-				toggleNeighborCrossSideState(g_ubMapCursorX, g_ubMapCursorY, ubKeyIndex);
+				toggleCrossSideState(s_ubMapCursorX, s_ubMapCursorY, ubKeyIndex);
+				toggleNeighborCrossSideState(s_ubMapCursorX, s_ubMapCursorY, ubKeyIndex);
 
 				drawCursor();
 			}
@@ -78,14 +87,14 @@ void handleMapEditActions() {
 void handleMapCursorActions() {
 	for (UBYTE ubKeyIndex = 0; ubKeyIndex < CROSS_SIDE_COUNT; ++ubKeyIndex) {
 		if (keyUse(s_pKeysForMapCursor[ubKeyIndex])) {
-			UBYTE ubCursorX = getMapNeighborX(g_ubMapCursorX, ubKeyIndex);
-			UBYTE ubCursorY = getMapNeighborY(g_ubMapCursorX, g_ubMapCursorY, ubKeyIndex);
+			UBYTE ubCursorX = getMapNeighborX(s_ubMapCursorX, ubKeyIndex);
+			UBYTE ubCursorY = getMapNeighborY(s_ubMapCursorX, s_ubMapCursorY, ubKeyIndex);
 
 			if ((ubCursorX != MAP_WIDTH) && (ubCursorY != MAP_HEIGHT)) {
 				undrawCursor();
 
-				g_ubMapCursorX = ubCursorX;
-				g_ubMapCursorY = ubCursorY;
+				s_ubMapCursorX = ubCursorX;
+				s_ubMapCursorY = ubCursorY;
 
 				drawCursor();
 			}
@@ -93,11 +102,30 @@ void handleMapCursorActions() {
 	}
 }
 
+void handleEditorStepActions() {
+	if (keyUse(KEY_ESCAPE) || keyUse(KEY_BACKSPACE)) {
+		if (!s_ubEditorStep) {
+			gameClose();
+		}
+		else {
+			--s_ubEditorStep;
+			drawEditorStep();
+		}
+	}
+
+	if (keyUse(KEY_RETURN) || keyUse(KEY_SPACE)) {
+		if ((s_ubEditorStep + 1) < EDITOR_STEP_COUNT) {
+			++s_ubEditorStep;
+			drawEditorStep();
+		}
+	}
+}
+
 void handleMapLoadSaveActions() {
-	for (UBYTE ubKey = KEY_1; ubKey < KEY_0; ++ubKey) {
+	for (UBYTE ubKey = KEY_1; ubKey <= KEY_0; ++ubKey) {
 		if (keyUse(ubKey)) {
 			char szMapFilePath[255];
-			sprintf(szMapFilePath, "map%u.map", ubKey);
+			sprintf(szMapFilePath, "/data/maps/%u.map", ubKey);
 
 			if (keyCheck(KEY_LSHIFT) || keyCheck(KEY_RSHIFT)) {
 				saveMapToFile(szMapFilePath);
@@ -116,11 +144,11 @@ void handleMapLoadSaveActions() {
 void toggleCrossSideState(UBYTE ubCrossXIndex, UBYTE ubCrossYIndex, UBYTE ubCrossSide) {
 	g_pMapData[ubCrossXIndex][ubCrossYIndex] ^= 1 << ubCrossSide;
 
-	UWORD uwX = getMapCrossX(g_ubMapCursorX);
-	UWORD uwY = getMapCrossY(g_ubMapCursorX, g_ubMapCursorY);
+	UWORD uwX = getMapCrossX(s_ubMapCursorX);
+	UWORD uwY = getMapCrossY(s_ubMapCursorX, s_ubMapCursorY);
 
 	undrawCross(uwX, uwY);
-	drawCross(uwX, uwY, g_pMapData[g_ubMapCursorX][g_ubMapCursorY]);
+	drawCross(uwX, uwY, g_pMapData[s_ubMapCursorX][s_ubMapCursorY]);
 
 //	logWrite("New CrossData:\t\t\tA: %u, B: %u, C: %u, D: %u, E: %u, F: %u\n",
 //		getCrossSideState(g_pMapData[ubCrossXIndex][ubCrossYIndex], CROSS_SIDE_A),
@@ -159,29 +187,37 @@ void toggleNeighborCrossSideState(UBYTE ubCrossXIndex, UBYTE ubCrossYIndex, UBYT
 //	);
 }
 
+void drawEditorStep() {
+	blitCopyAligned(
+		s_pEditorStepBitMapAtlas[s_ubEditorStep], 0, 0,
+		g_pBufferManager->pBuffer, 0, 0,
+		EDITOR_STEP_WIDTH, EDITOR_STEP_HEIGHT
+	);
+}
+
 void drawCursor() {
-	UWORD uwX = getMapCrossX(g_ubMapCursorX);
-	UWORD uwY = getMapCrossY(g_ubMapCursorX, g_ubMapCursorY);
+	UWORD uwX = getMapCrossX(s_ubMapCursorX);
+	UWORD uwY = getMapCrossY(s_ubMapCursorX, s_ubMapCursorY);
 	UBYTE ubWidth = CROSS_WIDTH;
 	UBYTE ubHeight = CROSS_HEIGHT;
 	UBYTE ubStartX = 0;
 	UBYTE ubStartY = 0;
 
-	if (!g_ubMapCursorX) {
+	if (!s_ubMapCursorX) {
 		uwX += CROSS_CURSOR_LEFT;
 		ubWidth -= CROSS_CURSOR_LEFT;
 		ubStartX = CROSS_CURSOR_LEFT;
 	}
-	else if (g_ubMapCursorX == (MAP_WIDTH - 1)) {
+	else if (s_ubMapCursorX == (MAP_WIDTH - 1)) {
 		ubWidth -= CROSS_CURSOR_RIGHT;
 	}
 
-	if (!g_ubMapCursorY) {
+	if (!s_ubMapCursorY) {
 		uwY += CROSS_CURSOR_TOP;
 		ubHeight -= CROSS_CURSOR_TOP;
 		ubStartY = CROSS_CURSOR_TOP;
 	}
-	else if (g_ubMapCursorY == (MAP_HEIGHT - 1)) {
+	else if (s_ubMapCursorY == (MAP_HEIGHT - 1)) {
 		ubHeight -= CROSS_CURSOR_BOTTOM;
 	}
 
@@ -196,7 +232,7 @@ void drawCursor() {
 void undrawCursor() {
 	blitCopyMask(
 		g_pCrossBitMapAtlas[CROSS_CLEANUP], 0, 0,
-		g_pBufferManager->pBuffer, getMapCrossX(g_ubMapCursorX), getMapCrossY(g_ubMapCursorX, g_ubMapCursorY),
+		g_pBufferManager->pBuffer, getMapCrossX(s_ubMapCursorX), getMapCrossY(s_ubMapCursorX, s_ubMapCursorY),
 		CROSS_WIDTH, CROSS_HEIGHT,
 		g_pCrossBitMapMaskAtlas[CROSS_CURSOR]->pData
 	);

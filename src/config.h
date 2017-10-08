@@ -29,7 +29,7 @@
 #define CROSS_CURSOR_BOTTOM 29
 #define CROSS_CURSOR_LEFT 12
 
-#define ATLAS_COUNT 12
+#define CROSS_ATLAS_SIZE 12
 
 #define CROSS_BYTE_SIZE sizeof(UBYTE)
 #define CROSS_WIDTH 64
