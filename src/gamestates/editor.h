@@ -21,7 +21,8 @@ void gsEditorDestroy();
 void createEditorStepAtlas();
 void destroyEditorStepAtlas();
 
-void handleMapEditActions();
+void handleEditorStepCreateActions();
+void handleEditorStepDestinationPointActions();
 void handleMapCursorActions();
 void handleEditorStepActions();
 void handleMapLoadSaveActions();

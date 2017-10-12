@@ -6,6 +6,12 @@
 #include "config.h"
 
 extern UBYTE g_pMapData[MAP_WIDTH][MAP_HEIGHT];
+extern UBYTE g_ubStartPointX;
+extern UBYTE g_ubStartPointY;
+extern UBYTE g_ubStartPointCrossSide;
+extern UBYTE g_ubDestinationPointX;
+extern UBYTE g_ubDestinationPointY;
+extern UBYTE g_ubDestinationPointCrossSide;
 extern BYTE g_pMapCursorShifts[2][CROSS_SIDE_COUNT][2];
 
 UWORD getMapCrossX(
@@ -65,6 +71,9 @@ void undrawMapCross(
 	IN UBYTE ubCrossXIndex,
 	IN UBYTE ubCrossYIndex
 );
+
+void drawMapDestinationPoint();
+void undrawMapDestinationPoint();
 
 UBYTE saveMapToFile(
 	IN char *szFilePath

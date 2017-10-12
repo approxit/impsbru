@@ -29,6 +29,13 @@ void createCrossAtlas() {
 	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_CENTER, "/data/cross_frames/center.bm", "/data/cross_frames/center.msk");
 	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_CURSOR, "/data/cross_frames/cursor.bm", "/data/cross_frames/cursor.msk");
 	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_CLEANUP, "/data/cross_frames/cleanup.bm", "/data/cross_frames/cleanup.msk");
+
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_DESTINATION_OFFSET + CROSS_SIDE_A, "/data/cross_frames/a_final.bm", "/data/cross_frames/a_final.msk");
+	/* Cross side A destination is not visible so it's disabled */
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_DESTINATION_OFFSET + CROSS_SIDE_C, "/data/cross_frames/c_final.bm", "/data/cross_frames/c_final.msk");
+	/* Cross side D destination is not visible so it's disabled */
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_DESTINATION_OFFSET + CROSS_SIDE_E, "/data/cross_frames/e_final.bm", "/data/cross_frames/e_final.msk");
+	/* Cross side F destination is not visible so it's disabled */
 }
 
 void destroyCrossAtlas() {
@@ -40,10 +47,12 @@ void drawCross(UWORD uwX, UWORD uwY, UBYTE ubCrossData) {
 		drawAtlasIndex(uwX, uwY, CROSS_CENTER);
 	}
 
+	/* Draw lower cross sides */
 	for (UBYTE ubCrossSide = 1; ubCrossSide < CROSS_SIDE_COUNT; ubCrossSide += 2) {
 		drawCrossSide(uwX, uwY, ubCrossData, ubCrossSide);
 	}
 
+	/* Draw upper cross sides in reverse, due to overlapping pixels */
 	for (UBYTE ubCrossSide = CROSS_SIDE_COUNT; 0 < ubCrossSide; ubCrossSide -= 2) {
 		drawCrossSide(uwX, uwY, ubCrossData, ubCrossSide - 2);
 	}
@@ -58,6 +67,14 @@ void drawCrossSide(UWORD uwX, UWORD uwY, UBYTE ubCrossData, UBYTE ubCrossSide) {
 	if (ubCrossSideState) {
 		drawAtlasIndex(uwX, uwY, ubCrossSide);
 	}
+}
+
+void drawDestinationPoint(UWORD uwX, UWORD uwY, UBYTE ubDestinationPointSide) {
+	drawAtlasIndex(uwX, uwY, CROSS_SIDE_DESTINATION_OFFSET + ubDestinationPointSide);
+}
+
+void undrawDestinationPoint(UWORD uwX, UWORD uwY) {
+	undrawCross(uwX, uwY);
 }
 
 void drawAtlasIndex(UWORD uwX, UWORD uwY, UBYTE ubAtlasIndex) {

@@ -19,7 +19,12 @@ void createAtlasFileWithMask(tBitMap *pBitMapAtlas[], tBitmapMask *pBitMapMaskAt
 void destroyAtlasFilesWithMask(tBitMap *pBitMapAtlas[], tBitmapMask *pBitMapMaskAtlas[], UBYTE ubAtlasCount) {
 	UBYTE ubAtlasIndex = ubAtlasCount;
 	while (ubAtlasIndex--) {
-		bitmapDestroy(pBitMapAtlas[ubAtlasIndex]);
-		bitmapMaskDestroy(pBitMapMaskAtlas[ubAtlasIndex]);
+		if (pBitMapAtlas[ubAtlasIndex]) {
+			bitmapDestroy(pBitMapAtlas[ubAtlasIndex]);
+		}
+
+		if (pBitMapMaskAtlas[ubAtlasIndex]) {
+			bitmapMaskDestroy(pBitMapMaskAtlas[ubAtlasIndex]);
+		}
 	}
 }

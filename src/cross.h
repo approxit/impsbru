@@ -46,6 +46,17 @@ void drawCrossSide(
 	IN UBYTE ubCrossSide
 );
 
+void drawDestinationPoint(
+	IN UWORD uwX,
+	IN UWORD uwY,
+	IN UBYTE ubDestinationPointSide
+);
+
+void undrawDestinationPoint(
+	IN UWORD uwX,
+	IN UWORD uwY
+);
+
 void drawAtlasIndex(
 	IN UWORD uwX,
 	IN UWORD uwY,

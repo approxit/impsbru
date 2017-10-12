@@ -6,6 +6,12 @@
 #include "game.h"
 
 UBYTE g_pMapData[MAP_WIDTH][MAP_HEIGHT] = {0};
+UBYTE g_ubStartPointX = MAP_WIDTH;
+UBYTE g_ubStartPointY = MAP_HEIGHT;
+UBYTE g_ubStartPointCrossSide = 0;
+UBYTE g_ubDestinationPointX = MAP_WIDTH;
+UBYTE g_ubDestinationPointY = MAP_HEIGHT;
+UBYTE g_ubDestinationPointCrossSide = 0;
 BYTE g_pMapCursorShifts[2][CROSS_SIDE_COUNT][2] = {
 	{
    		{0, -1}, // N
@@ -101,6 +107,8 @@ void drawMap() {
 			drawMapCross(ubCrossXIndex, ubCrossYIndex);
 		}
 	}
+
+	drawMapDestinationPoint();
 }
 
 void undrawMap() {
@@ -125,6 +133,29 @@ void undrawMapCross(UBYTE ubCrossXIndex, UBYTE ubCrossYIndex) {
 		getMapCrossX(ubCrossXIndex),
 		getMapCrossY(ubCrossXIndex, ubCrossYIndex)
 	);
+}
+
+void drawMapDestinationPoint() {
+	if ((g_ubDestinationPointX != MAP_WIDTH) && (g_ubDestinationPointY != MAP_HEIGHT) && !(g_ubDestinationPointCrossSide & 1)) {
+		drawDestinationPoint(
+			getMapCrossX(g_ubDestinationPointX),
+			getMapCrossY(g_ubDestinationPointX, g_ubDestinationPointY),
+			g_ubDestinationPointCrossSide
+		);
+	}
+}
+
+void undrawMapDestinationPoint() {
+	if ((g_ubDestinationPointX != MAP_WIDTH) && (g_ubDestinationPointY != MAP_HEIGHT) && !(g_ubDestinationPointCrossSide & 1)) {
+		undrawDestinationPoint(
+			getMapCrossX(g_ubDestinationPointX),
+			getMapCrossY(g_ubDestinationPointX, g_ubDestinationPointY)
+		);
+
+		if (g_pMapData[g_ubDestinationPointX][g_ubDestinationPointY]) {
+			drawMapCross(g_ubDestinationPointX, g_ubDestinationPointY);
+		}
+	}
 }
 
 UBYTE saveMapToFile(char *szFilePath) {

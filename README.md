@@ -35,13 +35,14 @@ In AmigaDOS CLI you can use following commands:
 ## Controls
 
 ### Map Editor
-* **<kbd>q</kbd> / <kbd>w</kbd> / <kbd>e</kbd>** - toggles element at `north west` / `north` / `north east` direction of the cursor, if can.
-* **<kbd>z</kbd> / <kbd>x</kbd> / <kbd>c</kbd>** - toggles element at `south west` / `south` / `south east` direction of the cursor, if can.
 
-* **<kbd>u</kbd> / <kbd>i</kbd> / <kbd>o</kbd>** - moves cursor at `north west` / `north` / `north east` direction, if can.
-* **<kbd>m</kbd> / <kbd>,</kbd> / <kbd>.</kbd>** - moves cursor at `south west` / `south` / `south east` direction, if can.
+* **<kbd>q</kbd> / <kbd>w</kbd> / <kbd>e</kbd>** - toggles element at `north west` / `north` / `north east` direction of the cursor, if possible
+* **<kbd>z</kbd> / <kbd>x</kbd> / <kbd>c</kbd>** - toggles element at `south west` / `south` / `south east` direction of the cursor, if possible
 
-* **<kbd>escape</kbd> / <kbd>backspace</kbd>** - cancels action or if can't, exists the game.
+* **<kbd>u</kbd> / <kbd>i</kbd> / <kbd>o</kbd>** - moves cursor at `north west` / `north` / `north east` direction, if possible
+* **<kbd>m</kbd> / <kbd>,</kbd> / <kbd>.</kbd>** - moves cursor at `south west` / `south` / `south east` direction, if possible
+
+* **<kbd>escape</kbd> / <kbd>backspace</kbd>** - cancels action or exists the game, if not possible 
 * **<kbd>return</kbd> / <kbd>space</kbd>** - accepts action
 
 * **<kbd>1</kbd> to <kbd>0</kbd>** - loads example map from one of 10 slots
@@ -49,10 +50,10 @@ In AmigaDOS CLI you can use following commands:
 
 ## Built With
 
-* [Amiga C Engine](https://github.com/approxit/ACE) - Game engine
-* [Amiga C Engine CLI](https://github.com/approxit/ace-cli) - Build tool
+* [Amiga C Engine](https://github.com/approxit/ACE) - game engine
+* [Amiga C Engine CLI](https://github.com/approxit/ace-cli) - build tool
 * [amiga-dev](https://github.com/kusma/amiga-dev) - VBCC+VASM+VLINK development environment
-* [Photoshop](http://www.adobe.com/products/photoshop.html) - Graphics editor
+* [Photoshop](http://www.adobe.com/products/photoshop.html) - graphics editor
 
 ## Versioning
 

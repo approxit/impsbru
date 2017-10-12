@@ -45,9 +45,19 @@ void gsEditorCreate() {
 }
 
 void gsEditorLoop() {
-	handleMapEditActions();
-	handleMapCursorActions();
-	handleEditorStepActions();
+	switch (s_ubEditorStep) {
+		case EDITOR_STEP_CREATE:
+			handleEditorStepCreateActions();
+			handleMapCursorActions();
+			break;
+		case EDITOR_STEP_DESTINATION_POINT:
+			handleEditorStepDestinationPointActions();
+			handleMapCursorActions();
+			break;
+		default:
+			handleEditorStepActions();
+	}
+
 	handleMapLoadSaveActions();
 }
 
@@ -70,7 +80,8 @@ void destroyEditorStepAtlas() {
 	destroyAtlasFiles(s_pEditorStepBitMapAtlas, EDITOR_STEP_ATLAS_SIZE);
 }
 
-void handleMapEditActions() {
+void handleEditorStepCreateActions() {
+	/* Cross sides toggling */
 	for (UBYTE ubKeyIndex = 0; ubKeyIndex < CROSS_SIDE_COUNT; ++ubKeyIndex) {
 		if (keyUse(s_pKeysForCrossSide[ubKeyIndex])) {
 			BYTE ubCursorX = getMapNeighborXRestrictive(s_ubMapCursorX, ubKeyIndex);
@@ -82,6 +93,58 @@ void handleMapEditActions() {
 
 				drawCursor();
 			}
+		}
+	}
+
+	/* Cancel buttons handling */
+	if (keyUse(KEY_ESCAPE) || keyUse(KEY_BACKSPACE)) {
+		gameClose();
+	}
+
+	/* Accept buttons handling */
+	if (keyUse(KEY_RETURN) || keyUse(KEY_SPACE)) {
+		++s_ubEditorStep;
+		drawEditorStep();
+	}
+}
+void handleEditorStepDestinationPointActions() {
+	/* Cross sides toggling */
+	for (UBYTE ubKeyIndex = 0; ubKeyIndex < CROSS_SIDE_COUNT; ++ubKeyIndex) {
+		if (keyUse(s_pKeysForCrossSide[ubKeyIndex])) {
+			UBYTE ubCrossData = g_pMapData[s_ubMapCursorX][s_ubMapCursorY];
+			if (ubCrossData && !(ubKeyIndex & 1) && !getCrossSideState(ubCrossData, ubKeyIndex)) {
+				undrawMapDestinationPoint();
+
+				g_ubDestinationPointX = s_ubMapCursorX;
+				g_ubDestinationPointY = s_ubMapCursorY;
+				g_ubDestinationPointCrossSide = ubKeyIndex;
+
+				drawMapDestinationPoint();
+				drawCursor();
+			}
+		}
+	}
+
+	/* Cancel buttons handling */
+	if (keyUse(KEY_ESCAPE) || keyUse(KEY_BACKSPACE)) {
+		undrawMapDestinationPoint();
+		if ((g_ubDestinationPointX == s_ubMapCursorX) && (g_ubDestinationPointY == s_ubMapCursorY)) {
+			drawCursor();
+		}
+
+		g_ubDestinationPointX = MAP_WIDTH;
+		g_ubDestinationPointY = MAP_HEIGHT;
+		g_ubDestinationPointCrossSide = 0;
+
+		--s_ubEditorStep;
+		drawEditorStep();
+	}
+
+	/* Accept buttons handling */
+	if (keyUse(KEY_RETURN) || keyUse(KEY_SPACE)) {
+		if ((g_ubDestinationPointX != MAP_WIDTH) && (g_ubDestinationPointY != MAP_HEIGHT)) {
+			++s_ubEditorStep;
+			drawEditorStep();
 		}
 	}
 }
@@ -205,6 +268,7 @@ void drawCursor() {
 	UBYTE ubStartX = 0;
 	UBYTE ubStartY = 0;
 
+	/* Cut off horizontal sides of cursor at map edges */
 	if (!s_ubMapCursorX) {
 		uwX += CROSS_CURSOR_LEFT;
 		ubWidth -= CROSS_CURSOR_LEFT;
@@ -214,6 +278,7 @@ void drawCursor() {
 		ubWidth -= CROSS_CURSOR_RIGHT;
 	}
 
+	/* Cut off vertical sides of cursor at map edges */
 	if (!s_ubMapCursorY) {
 		uwY += CROSS_CURSOR_TOP;
 		ubHeight -= CROSS_CURSOR_TOP;
