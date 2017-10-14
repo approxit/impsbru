@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "cross.h"
+#include "cube.h"
 #include "game.h"
 
 UBYTE g_pMapData[MAP_WIDTH][MAP_HEIGHT] = {0};
@@ -108,6 +109,7 @@ void drawMap() {
 		}
 	}
 
+	drawMapStartPoint();
 	drawMapDestinationPoint();
 }
 
@@ -135,8 +137,30 @@ void undrawMapCross(UBYTE ubCrossXIndex, UBYTE ubCrossYIndex) {
 	);
 }
 
+void drawMapStartPoint() {
+	UWORD uwX = getMapCrossX(g_ubStartPointX);
+	UWORD uwY = getMapCrossY(g_ubStartPointX, g_ubStartPointY);
+
+	drawCube(
+		uwX + g_pCubeCrossSideAdjust[g_ubStartPointCrossSide][0][0],
+		uwY + g_pCubeCrossSideAdjust[g_ubStartPointCrossSide][0][1]
+	);
+
+	if (g_ubStartPointCrossSide & 1) {
+		drawCross(uwX, uwY, g_pMapData[g_ubStartPointX][g_ubStartPointY]);
+	}
+}
+
+void undrawMapStartPoint() {
+	UWORD uwX = getMapCrossX(g_ubStartPointX);
+	UWORD uwY = getMapCrossY(g_ubStartPointX, g_ubStartPointY);
+
+	undrawCross(uwX, uwY);
+	drawCross(uwX, uwY, g_pMapData[g_ubStartPointX][g_ubStartPointY]);
+}
+
 void drawMapDestinationPoint() {
-	if ((g_ubDestinationPointX != MAP_WIDTH) && (g_ubDestinationPointY != MAP_HEIGHT) && !(g_ubDestinationPointCrossSide & 1)) {
+	if ((g_ubDestinationPointX != MAP_WIDTH) && (g_ubDestinationPointY != MAP_HEIGHT) && g_pMapData[g_ubDestinationPointX][g_ubDestinationPointY] && !(g_ubDestinationPointCrossSide & 1)) {
 		drawDestinationPoint(
 			getMapCrossX(g_ubDestinationPointX),
 			getMapCrossY(g_ubDestinationPointX, g_ubDestinationPointY),
@@ -168,6 +192,12 @@ UBYTE saveMapToFile(char *szFilePath) {
 
 	fputc(MAP_WIDTH, pFile);
 	fputc(MAP_HEIGHT, pFile);
+	fputc(g_ubStartPointX, pFile);
+	fputc(g_ubStartPointY, pFile);
+	fputc(g_ubStartPointCrossSide, pFile);
+	fputc(g_ubDestinationPointX, pFile);
+	fputc(g_ubDestinationPointY, pFile);
+	fputc(g_ubDestinationPointCrossSide, pFile);
 
 	fwrite(g_pMapData, CROSS_BYTE_SIZE, MAP_WIDTH * MAP_HEIGHT, pFile);
 
@@ -193,6 +223,13 @@ UBYTE loadMapFromFile(char *szFilePath) {
 		logWrite("ERROR: Map dimensions mismatch! Map: %ux%u Engine: %ux%u\n", ubMapWidth, ubMapHeight, MAP_WIDTH, MAP_HEIGHT);
 		return 0;
 	}
+
+	g_ubStartPointX = fgetc(pFile);
+	g_ubStartPointY = fgetc(pFile);
+	g_ubStartPointCrossSide = fgetc(pFile);
+	g_ubDestinationPointX = fgetc(pFile);
+	g_ubDestinationPointY = fgetc(pFile);
+	g_ubDestinationPointCrossSide = fgetc(pFile);
 
 	fread(g_pMapData, CROSS_BYTE_SIZE, MAP_WIDTH * MAP_HEIGHT, pFile);
 

@@ -72,6 +72,8 @@ void undrawMapCross(
 	IN UBYTE ubCrossYIndex
 );
 
+void drawMapStartPoint();
+void undrawMapStartPoint();
 void drawMapDestinationPoint();
 void undrawMapDestinationPoint();
 

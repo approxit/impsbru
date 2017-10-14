@@ -44,7 +44,7 @@ void destroyCrossAtlas() {
 
 void drawCross(UWORD uwX, UWORD uwY, UBYTE ubCrossData) {
 	if (ubCrossData) {
-		drawAtlasIndex(uwX, uwY, CROSS_CENTER);
+		drawCrossAtlasIndex(uwX, uwY, CROSS_CENTER);
 	}
 
 	/* Draw lower cross sides */
@@ -59,25 +59,25 @@ void drawCross(UWORD uwX, UWORD uwY, UBYTE ubCrossData) {
 }
 
 void undrawCross(UWORD uwX, UWORD uwY) {
-	drawAtlasIndex(uwX, uwY, CROSS_CLEANUP);
+	drawCrossAtlasIndex(uwX, uwY, CROSS_CLEANUP);
 }
 
 void drawCrossSide(UWORD uwX, UWORD uwY, UBYTE ubCrossData, UBYTE ubCrossSide) {
 	UBYTE ubCrossSideState = getCrossSideState(ubCrossData, ubCrossSide);
 	if (ubCrossSideState) {
-		drawAtlasIndex(uwX, uwY, ubCrossSide);
+		drawCrossAtlasIndex(uwX, uwY, ubCrossSide);
 	}
 }
 
 void drawDestinationPoint(UWORD uwX, UWORD uwY, UBYTE ubDestinationPointSide) {
-	drawAtlasIndex(uwX, uwY, CROSS_SIDE_DESTINATION_OFFSET + ubDestinationPointSide);
+	drawCrossAtlasIndex(uwX, uwY, CROSS_SIDE_DESTINATION_OFFSET + ubDestinationPointSide);
 }
 
 void undrawDestinationPoint(UWORD uwX, UWORD uwY) {
 	undrawCross(uwX, uwY);
 }
 
-void drawAtlasIndex(UWORD uwX, UWORD uwY, UBYTE ubAtlasIndex) {
+void drawCrossAtlasIndex(UWORD uwX, UWORD uwY, UBYTE ubAtlasIndex) {
 //	blitRect(
 //		g_pBufferManager->pBuffer, uwX, uwY,
 //		CROSS_WIDTH, CROSS_HEIGHT,

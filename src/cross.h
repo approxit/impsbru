@@ -57,7 +57,7 @@ void undrawDestinationPoint(
 	IN UWORD uwY
 );
 
-void drawAtlasIndex(
+void drawCrossAtlasIndex(
 	IN UWORD uwX,
 	IN UWORD uwY,
 	IN UBYTE ubAtlasIndex

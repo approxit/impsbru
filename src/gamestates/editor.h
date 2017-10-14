@@ -22,7 +22,9 @@ void createEditorStepAtlas();
 void destroyEditorStepAtlas();
 
 void handleEditorStepCreateActions();
+void handleEditorStepStartPointActions();
 void handleEditorStepDestinationPointActions();
+void handleEditorStepPlayTestActions();
 void handleMapCursorActions();
 void handleEditorStepActions();
 void handleMapLoadSaveActions();
