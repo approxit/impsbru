@@ -30,7 +30,7 @@ void handleEditorStepActions();
 void handleMapLoadSaveActions();
 
 void loadCubePositionsFromMap();
-void setCubePositions(UBYTE ubCrossSide);
+void setNewCubeDestination(UBYTE ubCrossSide);
 void swapCubePositions();
 void addAndClampCubeCoordValue(
 	UWORD *pCubeCoordValue,

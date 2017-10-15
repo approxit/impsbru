@@ -259,9 +259,7 @@ void handleEditorStepPlayTestActions() {
 		if (keyUse(s_pKeysForCrossSide[ubKeyIndex]) || keyUse(s_pKeysForMapCursor[ubKeyIndex])) {
 			if (s_ubCubeCrossSide == CROSS_SIDE_COUNT) {
 			 	if (getCrossSideState(g_pMapData[s_ubCubeMapStartPointX][s_ubCubeMapStartPointY], ubKeyIndex) && (getOppositeCrossSide(ubKeyIndex) != s_ubCubeMapStartPointCrossSide)) {
-					s_ubCubeCrossSide = ubKeyIndex;
-
-					setCubePositions(ubKeyIndex);
+					setNewCubeDestination(ubKeyIndex);
 			 	}
 			}
 			else if (getOppositeCrossSide(s_ubCubeCrossSide) == ubKeyIndex) {
@@ -365,7 +363,7 @@ void loadCubePositionsFromMap() {
 	s_ubCubeCrossSide = CROSS_SIDE_COUNT;
 }
 
-void setCubePositions(UBYTE ubCrossSide) {
+void setNewCubeDestination(UBYTE ubCrossSide) {
 	s_ubCubeMapDestinationPointX = getMapNeighborX(s_ubCubeMapStartPointX, ubCrossSide);
 	s_ubCubeMapDestinationPointY = getMapNeighborY(s_ubCubeMapStartPointX, s_ubCubeMapStartPointY, ubCrossSide);
 
@@ -376,12 +374,6 @@ void setCubePositions(UBYTE ubCrossSide) {
 }
 
 void swapCubePositions() {
-	logWrite("Swap start\n");
-	logWrite("s_ubCubeMapStartPoint: %ux%u\n", s_ubCubeMapStartPointX, s_ubCubeMapStartPointY);
-	logWrite("s_ubCubeMapDestinationPoint: %ux%u\n", s_ubCubeMapDestinationPointX, s_ubCubeMapDestinationPointY);
-	logWrite("s_uwCubeStartPoint: %ux%u\n", s_uwCubeStartPointX, s_uwCubeStartPointY);
-	logWrite("s_uwCubeDestinationPoint: %ux%u\n", s_uwCubeDestinationPointX, s_uwCubeDestinationPointY);
-
 	UBYTE ubCubeMapStartPointX = s_ubCubeMapStartPointX;
 	UBYTE ubCubeMapStartPointY = s_ubCubeMapStartPointY;
 
@@ -399,33 +391,34 @@ void swapCubePositions() {
 
 	s_uwCubeDestinationPointX = uwCubeStartPointX;
 	s_uwCubeDestinationPointY = uwCubeStartPointY;
-
-	logWrite("Swap\n");
-	logWrite("s_ubCubeMapStartPoint: %ux%u\n", s_ubCubeMapStartPointX, s_ubCubeMapStartPointY);
-	logWrite("s_ubCubeMapDestinationPoint: %ux%u\n", s_ubCubeMapDestinationPointX, s_ubCubeMapDestinationPointY);
-	logWrite("s_uwCubeStartPoint: %ux%u\n", s_uwCubeStartPointX, s_uwCubeStartPointY);
-	logWrite("s_uwCubeDestinationPoint: %ux%u\n", s_uwCubeDestinationPointX, s_uwCubeDestinationPointY);
-	logWrite("Swap end\n");
 }
 
 void moveCube() {
 	if (s_ubCubeCrossSide != CROSS_SIDE_COUNT) {
 		if ((s_uwCubeX == s_uwCubeDestinationPointX) && (s_uwCubeY == s_uwCubeDestinationPointY)) {
-			s_ubCubeCrossSide = CROSS_SIDE_COUNT;
+			UBYTE ubNoOtherDirections = 1;
+			for (UBYTE ubCrossSide = 0; ubCrossSide < CROSS_SIDE_COUNT; ++ubCrossSide) {
+				if (getCrossSideState(g_pMapData[s_ubCubeMapDestinationPointX][s_ubCubeMapDestinationPointY], ubCrossSide) && (ubCrossSide != s_ubCubeCrossSide) && (ubCrossSide != getOppositeCrossSide(s_ubCubeCrossSide))) {
+					ubNoOtherDirections = 0;
+					break;
+				}
+			}
 
 			s_ubCubeMapStartPointX = s_ubCubeMapDestinationPointX;
 			s_ubCubeMapStartPointY = s_ubCubeMapDestinationPointY;
 
 			s_uwCubeStartPointX = s_uwCubeDestinationPointX;
 			s_uwCubeStartPointY = s_uwCubeDestinationPointY;
+
+			if (ubNoOtherDirections && getCrossSideState(g_pMapData[s_ubCubeMapDestinationPointX][s_ubCubeMapDestinationPointY], s_ubCubeCrossSide)) {
+				setNewCubeDestination(s_ubCubeCrossSide);
+			}
+			else {
+				s_ubCubeCrossSide = CROSS_SIDE_COUNT;
+			}
 		}
 		else {
 			undrawCube(s_uwCubeX, s_uwCubeY);
-
-
-			logWrite("s_uwCube: %ux%u\n", s_uwCubeX, s_uwCubeY);
-			logWrite("s_uwCubeStartPoint: %ux%u\n", s_uwCubeStartPointX, s_uwCubeStartPointY);
-			logWrite("s_uwCubeDestinationPoint: %ux%u\n", s_uwCubeDestinationPointX, s_uwCubeDestinationPointY);
 
 			addAndClampCubeCoordValue(&s_uwCubeX, s_pCubeStep[s_ubCubeCrossSide][0], s_uwCubeDestinationPointX);
 			addAndClampCubeCoordValue(&s_uwCubeY, s_pCubeStep[s_ubCubeCrossSide][1], s_uwCubeDestinationPointY);
