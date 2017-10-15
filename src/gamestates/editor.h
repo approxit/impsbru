@@ -12,7 +12,7 @@
 #define EDITOR_STEP_ATLAS_SIZE 5
 
 #define EDITOR_STEP_WIDTH WINDOW_SCREEN_WIDTH
-#define EDITOR_STEP_HEIGHT 32
+#define EDITOR_STEP_HEIGHT 22
 
 void gsEditorCreate();
 void gsEditorLoop();
@@ -28,6 +28,16 @@ void handleEditorStepPlayTestActions();
 void handleMapCursorActions();
 void handleEditorStepActions();
 void handleMapLoadSaveActions();
+
+void loadCubePositionsFromMap();
+void setCubePositions(UBYTE ubCrossSide);
+void swapCubePositions();
+void addAndClampCubeCoordValue(
+	UWORD *pCubeCoordValue,
+	BYTE bCubeStep,
+	UWORD uwMaxValue
+);
+
 void moveCube();
 
 void toggleCrossSideState(

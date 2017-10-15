@@ -4,6 +4,7 @@
 #include <ace/managers/key.h>
 #include <ace/managers/game.h>
 #include <ace/managers/blit.h>
+#include <ace/macros.h>
 
 #include "game.h"
 #include "cross.h"
@@ -31,12 +32,19 @@ static UBYTE s_pKeysForMapCursor[CROSS_SIDE_COUNT] = {
 };
 static UBYTE s_ubEditorStep = EDITOR_STEP_CREATE;
 static tBitMap *s_pEditorStepBitMapAtlas[EDITOR_STEP_ATLAS_SIZE] = {0};
-static UBYTE s_ubCubeDirection = CROSS_SIDE_COUNT;
-static UBYTE s_ubCubeMoveMapStartPointX = 0;
-static UBYTE s_ubCubeMoveMapStartPointY = 0;
-static UBYTE s_ubCubeMoveMapStartPointCrossSide = 0;
+static UBYTE s_ubCubeCrossSide = CROSS_SIDE_COUNT;
+static UBYTE s_ubCubeMapStartPointX = 0;
+static UBYTE s_ubCubeMapStartPointY = 0;
+static UBYTE s_ubCubeMapStartPointCrossSide = 0;
+static UBYTE s_ubCubeMapDestinationPointX = 0;
+static UBYTE s_ubCubeMapDestinationPointY = 0;
+static UBYTE s_ubCubeMapDestinationPointCrossSide = 0;
 static UWORD s_uwCubeX = 0;
 static UWORD s_uwCubeY = 0;
+static UWORD s_uwCubeStartPointX = 0;
+static UWORD s_uwCubeStartPointY = 0;
+static UWORD s_uwCubeDestinationPointX = 0;
+static UWORD s_uwCubeDestinationPointY = 0;
 static BYTE s_pCubeStep[CROSS_SIDE_COUNT][2] = {
 	{0, -2}, // N
 	{2, -1}, // NE
@@ -139,6 +147,7 @@ void handleEditorStepCreateActions() {
 			undrawMap();
 			drawMap();
 			drawCursor();
+			drawEditorStep();
 		}
 	}
 
@@ -157,9 +166,9 @@ void handleEditorStepStartPointActions() {
 			if (ubCrossData && !getCrossSideState(ubCrossData, ubKeyIndex)) {
 				undrawMapStartPoint();
 
-				g_ubStartPointX = s_ubMapCursorX;
-				g_ubStartPointY = s_ubMapCursorY;
-				g_ubStartPointCrossSide = ubKeyIndex;
+				g_ubMapStartPointX = s_ubMapCursorX;
+				g_ubMapStartPointY = s_ubMapCursorY;
+				g_ubMapStartPointCrossSide = ubKeyIndex;
 
 				drawMapStartPoint();
 				drawCursor();
@@ -170,13 +179,13 @@ void handleEditorStepStartPointActions() {
 	/* Cancel buttons handling */
 	if (keyUse(KEY_ESCAPE) || keyUse(KEY_BACKSPACE)) {
 		undrawMapStartPoint();
-		if ((g_ubStartPointX == s_ubMapCursorX) && (g_ubStartPointY == s_ubMapCursorY)) {
+		if ((g_ubMapStartPointX == s_ubMapCursorX) && (g_ubMapStartPointY == s_ubMapCursorY)) {
 			drawCursor();
 		}
 
-		g_ubStartPointX = MAP_WIDTH;
-		g_ubStartPointY = MAP_HEIGHT;
-		g_ubStartPointCrossSide = 0;
+		g_ubMapStartPointX = MAP_WIDTH;
+		g_ubMapStartPointY = MAP_HEIGHT;
+		g_ubMapStartPointCrossSide = 0;
 
 		--s_ubEditorStep;
 		drawEditorStep();
@@ -184,7 +193,7 @@ void handleEditorStepStartPointActions() {
 
 	/* Accept buttons handling */
 	if (keyUse(KEY_RETURN) || keyUse(KEY_SPACE)) {
-		if ((g_ubStartPointX != MAP_WIDTH) && (g_ubStartPointY != MAP_HEIGHT)) {
+		if ((g_ubMapStartPointX != MAP_WIDTH) && (g_ubMapStartPointY != MAP_HEIGHT)) {
 			++s_ubEditorStep;
 			drawEditorStep();
 		}
@@ -196,16 +205,16 @@ void handleEditorStepDestinationPointActions() {
 	for (UBYTE ubKeyIndex = 0; ubKeyIndex < CROSS_SIDE_COUNT; ++ubKeyIndex) {
 		if (keyUse(s_pKeysForCrossSide[ubKeyIndex])) {
 			UBYTE ubCrossData = g_pMapData[s_ubMapCursorX][s_ubMapCursorY];
-			if (ubCrossData && !(ubKeyIndex & 1) && !getCrossSideState(ubCrossData, ubKeyIndex) && !((s_ubMapCursorX == g_ubStartPointX) && (s_ubMapCursorY == g_ubStartPointY) && (g_ubStartPointCrossSide == ubKeyIndex))) {
+			if (ubCrossData && !(ubKeyIndex & 1) && !getCrossSideState(ubCrossData, ubKeyIndex) && !((s_ubMapCursorX == g_ubMapStartPointX) && (s_ubMapCursorY == g_ubMapStartPointY) && (g_ubMapStartPointCrossSide == ubKeyIndex))) {
 				undrawMapDestinationPoint();
 
-				if ((g_ubDestinationPointX == g_ubStartPointX) && (g_ubDestinationPointY == g_ubStartPointY)) {
+				if ((g_ubMapDestinationPointX == g_ubMapStartPointX) && (g_ubMapDestinationPointY == g_ubMapStartPointY)) {
 					drawMapStartPoint();
 				}
 
-				g_ubDestinationPointX = s_ubMapCursorX;
-				g_ubDestinationPointY = s_ubMapCursorY;
-				g_ubDestinationPointCrossSide = ubKeyIndex;
+				g_ubMapDestinationPointX = s_ubMapCursorX;
+				g_ubMapDestinationPointY = s_ubMapCursorY;
+				g_ubMapDestinationPointCrossSide = ubKeyIndex;
 
 				drawMapDestinationPoint();
 				drawCursor();
@@ -217,17 +226,17 @@ void handleEditorStepDestinationPointActions() {
 	if (keyUse(KEY_ESCAPE) || keyUse(KEY_BACKSPACE)) {
 		undrawMapDestinationPoint();
 
-		if ((g_ubDestinationPointX == g_ubStartPointX) && (g_ubDestinationPointY == g_ubStartPointX)) {
+		if ((g_ubMapDestinationPointX == g_ubMapStartPointX) && (g_ubMapDestinationPointY == g_ubMapStartPointX)) {
 			drawMapStartPoint();
 		}
 
-		if ((g_ubDestinationPointX == s_ubMapCursorX) && (g_ubDestinationPointY == s_ubMapCursorY)) {
+		if ((g_ubMapDestinationPointX == s_ubMapCursorX) && (g_ubMapDestinationPointY == s_ubMapCursorY)) {
 			drawCursor();
 		}
 
-		g_ubDestinationPointX = MAP_WIDTH;
-		g_ubDestinationPointY = MAP_HEIGHT;
-		g_ubDestinationPointCrossSide = 0;
+		g_ubMapDestinationPointX = MAP_WIDTH;
+		g_ubMapDestinationPointY = MAP_HEIGHT;
+		g_ubMapDestinationPointCrossSide = 0;
 
 		--s_ubEditorStep;
 		drawEditorStep();
@@ -235,8 +244,10 @@ void handleEditorStepDestinationPointActions() {
 
 	/* Accept buttons handling */
 	if (keyUse(KEY_RETURN) || keyUse(KEY_SPACE)) {
-		if ((g_ubDestinationPointX != MAP_WIDTH) && (g_ubDestinationPointY != MAP_HEIGHT)) {
+		if ((g_ubMapDestinationPointX != MAP_WIDTH) && (g_ubMapDestinationPointY != MAP_HEIGHT)) {
 			undrawCursor();
+			loadCubePositionsFromMap();
+
 			++s_ubEditorStep;
 			drawEditorStep();
 		}
@@ -246,13 +257,17 @@ void handleEditorStepDestinationPointActions() {
 void handleEditorStepPlayTestActions() {
 	for (UBYTE ubKeyIndex = 0; ubKeyIndex < CROSS_SIDE_COUNT; ++ubKeyIndex) {
 		if (keyUse(s_pKeysForCrossSide[ubKeyIndex]) || keyUse(s_pKeysForMapCursor[ubKeyIndex])) {
-			if (s_ubCubeDirection == CROSS_SIDE_COUNT) {
-			 	if (getCrossSideState(g_pMapData[s_ubCubeMoveMapStartPointX][s_ubCubeMoveMapStartPointY], ubKeyIndex) && (getOppositeCrossSide(ubKeyIndex) != s_ubCubeMoveMapStartPointCrossSide)) {
-					s_ubCubeDirection = ubKeyIndex;
+			if (s_ubCubeCrossSide == CROSS_SIDE_COUNT) {
+			 	if (getCrossSideState(g_pMapData[s_ubCubeMapStartPointX][s_ubCubeMapStartPointY], ubKeyIndex) && (getOppositeCrossSide(ubKeyIndex) != s_ubCubeMapStartPointCrossSide)) {
+					s_ubCubeCrossSide = ubKeyIndex;
+
+					setCubePositions(ubKeyIndex);
 			 	}
 			}
-			else if (getOppositeCrossSide(s_ubCubeDirection) == ubKeyIndex) {
-				s_ubCubeDirection = ubKeyIndex;
+			else if (getOppositeCrossSide(s_ubCubeCrossSide) == ubKeyIndex) {
+				s_ubCubeCrossSide = ubKeyIndex;
+
+				swapCubePositions();
 			}
 		}
 	}
@@ -265,14 +280,7 @@ void handleEditorStepPlayTestActions() {
 
 		undrawCube(s_uwCubeX, s_uwCubeY);
 
-		s_uwCubeX = getMapCrossX(g_ubStartPointX) + g_pCubeCrossSideAdjust[g_ubStartPointCrossSide][0][0];
-		s_uwCubeY = getMapCrossY(g_ubStartPointX, g_ubStartPointY) + g_pCubeCrossSideAdjust[g_ubStartPointCrossSide][0][1];
-
-		s_ubCubeMoveMapStartPointX = g_ubStartPointX;
-		s_ubCubeMoveMapStartPointY = g_ubStartPointY;
-		s_ubCubeMoveMapStartPointCrossSide = g_ubStartPointCrossSide;
-
-		s_ubCubeDirection = CROSS_SIDE_COUNT;
+		loadCubePositionsFromMap();
 
 		drawMapStartPoint();
 	}
@@ -331,14 +339,7 @@ void handleMapLoadSaveActions() {
 				saveMapToFile(szMapFilePath);
 			}
 			else if (loadMapFromFile(szMapFilePath)) {
-				s_uwCubeX = getMapCrossX(g_ubStartPointX) + g_pCubeCrossSideAdjust[g_ubStartPointCrossSide][0][0];
-				s_uwCubeY = getMapCrossY(g_ubStartPointX, g_ubStartPointY) + g_pCubeCrossSideAdjust[g_ubStartPointCrossSide][0][1];
-
-				s_ubCubeMoveMapStartPointX = g_ubStartPointX;
-				s_ubCubeMoveMapStartPointY = g_ubStartPointY;
-				s_ubCubeMoveMapStartPointCrossSide = g_ubStartPointCrossSide;
-
-				s_ubCubeDirection = CROSS_SIDE_COUNT;
+				loadCubePositionsFromMap();
 
 				undrawMap();
 				drawMap();
@@ -350,14 +351,104 @@ void handleMapLoadSaveActions() {
 	}
 }
 
+void loadCubePositionsFromMap() {
+	s_ubCubeMapStartPointX = g_ubMapStartPointX;
+	s_ubCubeMapStartPointY = g_ubMapStartPointY;
+	s_ubCubeMapStartPointCrossSide = g_ubMapStartPointCrossSide;
+
+	s_uwCubeX = getMapCrossX(s_ubCubeMapStartPointX) + g_pCubeCrossSideAdjust[s_ubCubeMapStartPointCrossSide][0][0];
+	s_uwCubeY = getMapCrossY(s_ubCubeMapStartPointX, s_ubCubeMapStartPointY) + g_pCubeCrossSideAdjust[s_ubCubeMapStartPointCrossSide][0][1];
+
+	s_uwCubeStartPointX = s_uwCubeX;
+	s_uwCubeStartPointY = s_uwCubeY;
+
+	s_ubCubeCrossSide = CROSS_SIDE_COUNT;
+}
+
+void setCubePositions(UBYTE ubCrossSide) {
+	s_ubCubeMapDestinationPointX = getMapNeighborX(s_ubCubeMapStartPointX, ubCrossSide);
+	s_ubCubeMapDestinationPointY = getMapNeighborY(s_ubCubeMapStartPointX, s_ubCubeMapStartPointY, ubCrossSide);
+
+	s_uwCubeDestinationPointX = getMapCrossX(s_ubCubeMapDestinationPointX) + g_pCubeCrossSideAdjust[s_ubCubeMapStartPointCrossSide][0][0];
+	s_uwCubeDestinationPointY = getMapCrossY(s_ubCubeMapDestinationPointX, s_ubCubeMapDestinationPointY) + g_pCubeCrossSideAdjust[s_ubCubeMapStartPointCrossSide][0][1];
+
+	s_ubCubeCrossSide = ubCrossSide;
+}
+
+void swapCubePositions() {
+	logWrite("Swap start\n");
+	logWrite("s_ubCubeMapStartPoint: %ux%u\n", s_ubCubeMapStartPointX, s_ubCubeMapStartPointY);
+	logWrite("s_ubCubeMapDestinationPoint: %ux%u\n", s_ubCubeMapDestinationPointX, s_ubCubeMapDestinationPointY);
+	logWrite("s_uwCubeStartPoint: %ux%u\n", s_uwCubeStartPointX, s_uwCubeStartPointY);
+	logWrite("s_uwCubeDestinationPoint: %ux%u\n", s_uwCubeDestinationPointX, s_uwCubeDestinationPointY);
+
+	UBYTE ubCubeMapStartPointX = s_ubCubeMapStartPointX;
+	UBYTE ubCubeMapStartPointY = s_ubCubeMapStartPointY;
+
+	s_ubCubeMapStartPointX = s_ubCubeMapDestinationPointX;
+	s_ubCubeMapStartPointY = s_ubCubeMapDestinationPointY;
+
+	s_ubCubeMapDestinationPointX = ubCubeMapStartPointX;
+	s_ubCubeMapDestinationPointY = ubCubeMapStartPointY;
+
+	UWORD uwCubeStartPointX = s_uwCubeStartPointX;
+	UWORD uwCubeStartPointY = s_uwCubeStartPointY;
+
+	s_uwCubeStartPointX = s_uwCubeDestinationPointX;
+	s_uwCubeStartPointY = s_uwCubeDestinationPointY;
+
+	s_uwCubeDestinationPointX = uwCubeStartPointX;
+	s_uwCubeDestinationPointY = uwCubeStartPointY;
+
+	logWrite("Swap\n");
+	logWrite("s_ubCubeMapStartPoint: %ux%u\n", s_ubCubeMapStartPointX, s_ubCubeMapStartPointY);
+	logWrite("s_ubCubeMapDestinationPoint: %ux%u\n", s_ubCubeMapDestinationPointX, s_ubCubeMapDestinationPointY);
+	logWrite("s_uwCubeStartPoint: %ux%u\n", s_uwCubeStartPointX, s_uwCubeStartPointY);
+	logWrite("s_uwCubeDestinationPoint: %ux%u\n", s_uwCubeDestinationPointX, s_uwCubeDestinationPointY);
+	logWrite("Swap end\n");
+}
+
 void moveCube() {
-	if (s_ubCubeDirection != CROSS_SIDE_COUNT) {
-		undrawCube(s_uwCubeX, s_uwCubeY);
+	if (s_ubCubeCrossSide != CROSS_SIDE_COUNT) {
+		if ((s_uwCubeX == s_uwCubeDestinationPointX) && (s_uwCubeY == s_uwCubeDestinationPointY)) {
+			s_ubCubeCrossSide = CROSS_SIDE_COUNT;
 
-		s_uwCubeX += s_pCubeStep[s_ubCubeDirection][0];
-		s_uwCubeY += s_pCubeStep[s_ubCubeDirection][1];
+			s_ubCubeMapStartPointX = s_ubCubeMapDestinationPointX;
+			s_ubCubeMapStartPointY = s_ubCubeMapDestinationPointY;
 
-		drawCube(s_uwCubeX, s_uwCubeY);
+			s_uwCubeStartPointX = s_uwCubeDestinationPointX;
+			s_uwCubeStartPointY = s_uwCubeDestinationPointY;
+		}
+		else {
+			undrawCube(s_uwCubeX, s_uwCubeY);
+
+
+			logWrite("s_uwCube: %ux%u\n", s_uwCubeX, s_uwCubeY);
+			logWrite("s_uwCubeStartPoint: %ux%u\n", s_uwCubeStartPointX, s_uwCubeStartPointY);
+			logWrite("s_uwCubeDestinationPoint: %ux%u\n", s_uwCubeDestinationPointX, s_uwCubeDestinationPointY);
+
+			addAndClampCubeCoordValue(&s_uwCubeX, s_pCubeStep[s_ubCubeCrossSide][0], s_uwCubeDestinationPointX);
+			addAndClampCubeCoordValue(&s_uwCubeY, s_pCubeStep[s_ubCubeCrossSide][1], s_uwCubeDestinationPointY);
+
+			drawCube(s_uwCubeX, s_uwCubeY);
+		}
+	}
+}
+
+void addAndClampCubeCoordValue(UWORD *pCubeCoordValue, BYTE bCubeStep, UWORD uwMaxValue) {
+	if (bCubeStep < 0) {
+		*pCubeCoordValue += bCubeStep;
+
+		if (*pCubeCoordValue < uwMaxValue) {
+			*pCubeCoordValue = uwMaxValue;
+		}
+	}
+	else if (0 < bCubeStep) {
+		*pCubeCoordValue += bCubeStep;
+
+		if (uwMaxValue < *pCubeCoordValue) {
+			*pCubeCoordValue = uwMaxValue;
+		}
 	}
 }
 
