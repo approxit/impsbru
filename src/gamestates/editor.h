@@ -28,6 +28,7 @@ void handleEditorStepPlayTestActions();
 void handleMapCursorActions();
 void handleEditorStepActions();
 void handleMapLoadSaveActions();
+void moveCube();
 
 void toggleCrossSideState(
 	IN UBYTE ubCrossXIndex,

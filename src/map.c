@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#include <ace/managers/blit.h>
+
 #include "cross.h"
 #include "cube.h"
 #include "game.h"
@@ -37,7 +39,7 @@ UWORD getMapCrossX(UBYTE ubCrossXIndex) {
 }
 
 UWORD getMapCrossY(UBYTE ubCrossXIndex, UBYTE ubCrossYIndex) {
-	return 17 + ((ubCrossXIndex % 2) * CROSS_ODD_Y_SHIFT) + (CROSS_Y_SHIFT * ubCrossYIndex);
+	return MAP_Y_OFFSET + ((ubCrossXIndex % 2) * CROSS_ODD_Y_SHIFT) + (CROSS_Y_SHIFT * ubCrossYIndex);
 }
 
 BYTE getMapShiftX(UBYTE ubMapCursorX, UBYTE ubCrossSide) {
@@ -114,11 +116,11 @@ void drawMap() {
 }
 
 void undrawMap() {
-	for (UBYTE ubCrossXIndex = 0; ubCrossXIndex < MAP_WIDTH; ++ubCrossXIndex) {
-		for (UBYTE ubCrossYIndex = 0; ubCrossYIndex < MAP_HEIGHT; ++ubCrossYIndex) {
-			undrawMapCross(ubCrossXIndex, ubCrossYIndex);
-		}
-	}
+	blitRect(
+		g_pBufferManager->pBuffer, 0, MAP_Y_OFFSET,
+		MAP_WIDTH * CROSS_X_SHIFT, MAP_HEIGHT * CROSS_Y_SHIFT + CROSS_ODD_Y_SHIFT,
+		0
+	);
 }
 
 void drawMapCross(UBYTE ubCrossXIndex, UBYTE ubCrossYIndex) {
@@ -138,25 +140,29 @@ void undrawMapCross(UBYTE ubCrossXIndex, UBYTE ubCrossYIndex) {
 }
 
 void drawMapStartPoint() {
-	UWORD uwX = getMapCrossX(g_ubStartPointX);
-	UWORD uwY = getMapCrossY(g_ubStartPointX, g_ubStartPointY);
+	if ((g_ubStartPointX != MAP_WIDTH) && (g_ubStartPointY != MAP_HEIGHT)) {
+		UWORD uwX = getMapCrossX(g_ubStartPointX);
+		UWORD uwY = getMapCrossY(g_ubStartPointX, g_ubStartPointY);
 
-	drawCube(
-		uwX + g_pCubeCrossSideAdjust[g_ubStartPointCrossSide][0][0],
-		uwY + g_pCubeCrossSideAdjust[g_ubStartPointCrossSide][0][1]
-	);
+		drawCube(
+			uwX + g_pCubeCrossSideAdjust[g_ubStartPointCrossSide][0][0],
+			uwY + g_pCubeCrossSideAdjust[g_ubStartPointCrossSide][0][1]
+		);
 
-	if (g_ubStartPointCrossSide & 1) {
-		drawCross(uwX, uwY, g_pMapData[g_ubStartPointX][g_ubStartPointY]);
+		if (g_ubStartPointCrossSide & 1) {
+			drawCross(uwX, uwY, g_pMapData[g_ubStartPointX][g_ubStartPointY]);
+		}
 	}
 }
 
 void undrawMapStartPoint() {
-	UWORD uwX = getMapCrossX(g_ubStartPointX);
-	UWORD uwY = getMapCrossY(g_ubStartPointX, g_ubStartPointY);
+	if ((g_ubStartPointX != MAP_WIDTH) && (g_ubStartPointY != MAP_HEIGHT)) {
+		UWORD uwX = getMapCrossX(g_ubStartPointX);
+		UWORD uwY = getMapCrossY(g_ubStartPointX, g_ubStartPointY);
 
-	undrawCross(uwX, uwY);
-	drawCross(uwX, uwY, g_pMapData[g_ubStartPointX][g_ubStartPointY]);
+		undrawCross(uwX, uwY);
+		drawCross(uwX, uwY, g_pMapData[g_ubStartPointX][g_ubStartPointY]);
+	}
 }
 
 void drawMapDestinationPoint() {

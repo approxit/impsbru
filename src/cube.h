@@ -18,7 +18,10 @@ void drawCube(
 	IN UWORD uwY
 );
 
-void undrawCube();
+void undrawCube(
+	IN UWORD uwX,
+	IN UWORD uwY
+);
 
 void drawCubeAtlasIndex(
 	IN UWORD uwX,

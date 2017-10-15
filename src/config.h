@@ -44,10 +44,13 @@
 
 #define CUBE_WIDTH 18
 #define CUBE_HEIGHT 18
+#define CUBE_BITMAP_WIDTH 32
+#define CUBE_BITMAP_HEIGHT 32
 
 #define CUBE_ADJUST_COUNT 1
 
 #define MAP_WIDTH 6
 #define MAP_HEIGHT 4
+#define MAP_Y_OFFSET 17
 
 #endif
