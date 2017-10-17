@@ -32,15 +32,17 @@ static UBYTE s_pKeysForMapCursor[CROSS_SIDE_COUNT] = {
 };
 static UBYTE s_ubEditorStep = EDITOR_STEP_CREATE;
 static tBitMap *s_pEditorStepBitMapAtlas[EDITOR_STEP_ATLAS_SIZE] = {0};
-static UBYTE s_ubCubeCrossSide = CROSS_SIDE_COUNT;
 static UBYTE s_ubCubeMapStartPointX = 0;
 static UBYTE s_ubCubeMapStartPointY = 0;
 static UBYTE s_ubCubeMapStartPointCrossSide = 0;
+static UBYTE s_ubCubeMapStartPointCrossSideAdjustRotation = 0;
 static UBYTE s_ubCubeMapDestinationPointX = 0;
 static UBYTE s_ubCubeMapDestinationPointY = 0;
 static UBYTE s_ubCubeMapDestinationPointCrossSide = 0;
+static UBYTE s_ubCubeMapDestinationPointCrossSideAdjustRotation = 0;
 static UWORD s_uwCubeX = 0;
 static UWORD s_uwCubeY = 0;
+static UBYTE s_ubCubeMoveCrossSide = CROSS_SIDE_COUNT;
 static UWORD s_uwCubeStartPointX = 0;
 static UWORD s_uwCubeStartPointY = 0;
 static UWORD s_uwCubeDestinationPointX = 0;
@@ -230,9 +232,10 @@ void handleEditorStepDestinationPointActions() {
 			drawMapStartPoint();
 		}
 
-		if ((g_ubMapDestinationPointX == s_ubMapCursorX) && (g_ubMapDestinationPointY == s_ubMapCursorY)) {
-			drawCursor();
-		}
+		undrawCursor();
+		s_ubMapCursorX = g_ubMapStartPointX;
+		s_ubMapCursorY = g_ubMapStartPointY;
+		drawCursor();
 
 		g_ubMapDestinationPointX = MAP_WIDTH;
 		g_ubMapDestinationPointY = MAP_HEIGHT;
@@ -256,14 +259,15 @@ void handleEditorStepDestinationPointActions() {
 
 void handleEditorStepPlayTestActions() {
 	for (UBYTE ubKeyIndex = 0; ubKeyIndex < CROSS_SIDE_COUNT; ++ubKeyIndex) {
-		if (keyUse(s_pKeysForCrossSide[ubKeyIndex]) || keyUse(s_pKeysForMapCursor[ubKeyIndex])) {
-			if (s_ubCubeCrossSide == CROSS_SIDE_COUNT) {
-			 	if (getCrossSideState(g_pMapData[s_ubCubeMapStartPointX][s_ubCubeMapStartPointY], ubKeyIndex) && (getOppositeCrossSide(ubKeyIndex) != s_ubCubeMapStartPointCrossSide)) {
+		if (keyCheck(s_pKeysForCrossSide[ubKeyIndex]) || keyCheck(s_pKeysForMapCursor[ubKeyIndex])) {
+			if (s_ubCubeMoveCrossSide == CROSS_SIDE_COUNT) {
+			 	if (isCubeMovePossible(ubKeyIndex)) {
 					setNewCubeDestination(ubKeyIndex);
+					s_ubCubeMoveCrossSide = ubKeyIndex;
 			 	}
 			}
-			else if (getOppositeCrossSide(s_ubCubeCrossSide) == ubKeyIndex) {
-				s_ubCubeCrossSide = ubKeyIndex;
+			else if (getOppositeCrossSide(s_ubCubeMoveCrossSide) == ubKeyIndex) {
+				s_ubCubeMoveCrossSide = ubKeyIndex;
 
 				swapCubePositions();
 			}
@@ -272,8 +276,8 @@ void handleEditorStepPlayTestActions() {
 
 	/* Cancel buttons handling */
 	if (keyUse(KEY_ESCAPE) || keyUse(KEY_BACKSPACE)) {
-		--s_ubEditorStep;
-		drawEditorStep();
+		s_ubMapCursorX = g_ubMapDestinationPointX;
+		s_ubMapCursorY = g_ubMapDestinationPointY;
 		drawCursor();
 
 		undrawCube(s_uwCubeX, s_uwCubeY);
@@ -281,6 +285,9 @@ void handleEditorStepPlayTestActions() {
 		loadCubePositionsFromMap();
 
 		drawMapStartPoint();
+
+		--s_ubEditorStep;
+		drawEditorStep();
 	}
 
 	/* Accept buttons handling */
@@ -353,35 +360,100 @@ void loadCubePositionsFromMap() {
 	s_ubCubeMapStartPointX = g_ubMapStartPointX;
 	s_ubCubeMapStartPointY = g_ubMapStartPointY;
 	s_ubCubeMapStartPointCrossSide = g_ubMapStartPointCrossSide;
+	s_ubCubeMapStartPointCrossSideAdjustRotation = g_ubMapStartPointCrossSide;
 
-	s_uwCubeX = getMapCrossX(s_ubCubeMapStartPointX) + g_pCubeCrossSideAdjust[s_ubCubeMapStartPointCrossSide][0][0];
-	s_uwCubeY = getMapCrossY(s_ubCubeMapStartPointX, s_ubCubeMapStartPointY) + g_pCubeCrossSideAdjust[s_ubCubeMapStartPointCrossSide][0][1];
+	s_uwCubeX = getMapCrossX(s_ubCubeMapStartPointX) + g_pCubeCrossSideAdjust[s_ubCubeMapStartPointCrossSide][s_ubCubeMapStartPointCrossSide][0];
+	s_uwCubeY = getMapCrossY(s_ubCubeMapStartPointX, s_ubCubeMapStartPointY) + g_pCubeCrossSideAdjust[s_ubCubeMapStartPointCrossSide][s_ubCubeMapStartPointCrossSide][1];
 
 	s_uwCubeStartPointX = s_uwCubeX;
 	s_uwCubeStartPointY = s_uwCubeY;
 
-	s_ubCubeCrossSide = CROSS_SIDE_COUNT;
+	s_ubCubeMoveCrossSide = CROSS_SIDE_COUNT;
+
+	s_ubCubeMapDestinationPointX = 0;
+	s_ubCubeMapDestinationPointX = 0;
+	s_ubCubeMapDestinationPointCrossSide = 0;
+	s_ubCubeMapDestinationPointCrossSideAdjustRotation = 0;
+
+	s_uwCubeDestinationPointX = 0;
+	s_uwCubeDestinationPointY = 0;
 }
 
 void setNewCubeDestination(UBYTE ubCrossSide) {
 	s_ubCubeMapDestinationPointX = getMapNeighborX(s_ubCubeMapStartPointX, ubCrossSide);
 	s_ubCubeMapDestinationPointY = getMapNeighborY(s_ubCubeMapStartPointX, s_ubCubeMapStartPointY, ubCrossSide);
 
-	s_uwCubeDestinationPointX = getMapCrossX(s_ubCubeMapDestinationPointX) + g_pCubeCrossSideAdjust[s_ubCubeMapStartPointCrossSide][0][0];
-	s_uwCubeDestinationPointY = getMapCrossY(s_ubCubeMapDestinationPointX, s_ubCubeMapDestinationPointY) + g_pCubeCrossSideAdjust[s_ubCubeMapStartPointCrossSide][0][1];
+	if (s_ubCubeMapStartPointCrossSideAdjustRotation == ubCrossSide) {
+		UBYTE ubCrossCrossSideAdjustRotation = s_ubCubeMapStartPointCrossSideAdjustRotation;
+		s_ubCubeMapStartPointCrossSideAdjustRotation = s_ubCubeMapStartPointCrossSide;
+		s_ubCubeMapStartPointCrossSide = ubCrossCrossSideAdjustRotation;
+	}
 
-	s_ubCubeCrossSide = ubCrossSide;
+	if (getCrossSideState(g_pMapData[s_ubCubeMapDestinationPointX][s_ubCubeMapDestinationPointY], s_ubCubeMapStartPointCrossSideAdjustRotation)) { /* Cube will be next to the cross side */
+		s_ubCubeMapDestinationPointCrossSide = getOppositeCrossSide(ubCrossSide);
+	}
+	else { /* Cube will be directly in cross side */
+		s_ubCubeMapDestinationPointCrossSide = s_ubCubeMapStartPointCrossSideAdjustRotation;
+	}
+
+	s_ubCubeMapDestinationPointCrossSideAdjustRotation = s_ubCubeMapStartPointCrossSideAdjustRotation;
+
+	s_uwCubeDestinationPointX = getMapCrossX(s_ubCubeMapDestinationPointX) + g_pCubeCrossSideAdjust[s_ubCubeMapDestinationPointCrossSide][s_ubCubeMapDestinationPointCrossSideAdjustRotation][0];
+	s_uwCubeDestinationPointY = getMapCrossY(s_ubCubeMapDestinationPointX, s_ubCubeMapDestinationPointY) + g_pCubeCrossSideAdjust[s_ubCubeMapDestinationPointCrossSide][s_ubCubeMapDestinationPointCrossSideAdjustRotation][1];
+
+	s_ubCubeMoveCrossSide = ubCrossSide;
+
+	drawCubeDebugCrossSide(
+		0,
+		WINDOW_SCREEN_HEIGHT - CROSS_HEIGHT,
+		s_ubCubeMapStartPointCrossSide,
+		s_ubCubeMapStartPointCrossSideAdjustRotation
+	);
+
+	drawCubeDebugCrossSide(
+		WINDOW_SCREEN_WIDTH - CROSS_WIDTH,
+		WINDOW_SCREEN_HEIGHT - CROSS_HEIGHT,
+		s_ubCubeMapDestinationPointCrossSide,
+		s_ubCubeMapDestinationPointCrossSideAdjustRotation
+	);
+
+	logWrite("setNewCubeDestination\n");
+	logWrite("s_ubCubeMapStartPointCrossSide: %u\n", s_ubCubeMapStartPointCrossSide);
+	logWrite("s_ubCubeMapStartPointCrossSideAdjustRotation: %u\n", s_ubCubeMapStartPointCrossSideAdjustRotation);
+	logWrite("s_ubCubeMapDestinationPointCrossSide: %u\n", s_ubCubeMapDestinationPointCrossSide);
+	logWrite("s_ubCubeMapDestinationPointCrossSideAdjustRotation: %u\n", s_ubCubeMapDestinationPointCrossSideAdjustRotation);
+}
+
+void drawCubeDebugCrossSide(UWORD uwX, UWORD uwY, UBYTE ubCrossSide, UBYTE ubCrossSideAdjustRotation) {
+	undrawCross(uwX, uwY);
+	drawCrossAtlasIndex(uwX, uwY, CROSS_CENTER);
+
+	drawCubeAtlasIndex(
+		uwX + g_pCubeCrossSideAdjust[ubCrossSide][ubCrossSideAdjustRotation][0],
+		uwY + g_pCubeCrossSideAdjust[ubCrossSide][ubCrossSideAdjustRotation][1],
+		0
+	);
+
+	if (ubCrossSide & 1) {
+		drawCrossAtlasIndex(uwX, uwY, CROSS_CENTER);
+	}
 }
 
 void swapCubePositions() {
 	UBYTE ubCubeMapStartPointX = s_ubCubeMapStartPointX;
 	UBYTE ubCubeMapStartPointY = s_ubCubeMapStartPointY;
+	UBYTE ubCubeMapStartPointCrossSide = s_ubCubeMapStartPointCrossSide;
+	UBYTE ubCubeMapStartPointCrossSideAdjustRotation = s_ubCubeMapStartPointCrossSideAdjustRotation;
 
 	s_ubCubeMapStartPointX = s_ubCubeMapDestinationPointX;
 	s_ubCubeMapStartPointY = s_ubCubeMapDestinationPointY;
+	s_ubCubeMapStartPointCrossSide = s_ubCubeMapDestinationPointCrossSide;
+	s_ubCubeMapStartPointCrossSideAdjustRotation = s_ubCubeMapDestinationPointCrossSideAdjustRotation;
 
 	s_ubCubeMapDestinationPointX = ubCubeMapStartPointX;
 	s_ubCubeMapDestinationPointY = ubCubeMapStartPointY;
+	s_ubCubeMapDestinationPointCrossSide = ubCubeMapStartPointCrossSide;
+	s_ubCubeMapDestinationPointCrossSideAdjustRotation = ubCubeMapStartPointCrossSideAdjustRotation;
 
 	UWORD uwCubeStartPointX = s_uwCubeStartPointX;
 	UWORD uwCubeStartPointY = s_uwCubeStartPointY;
@@ -393,54 +465,73 @@ void swapCubePositions() {
 	s_uwCubeDestinationPointY = uwCubeStartPointY;
 }
 
-void moveCube() {
-	if (s_ubCubeCrossSide != CROSS_SIDE_COUNT) {
-		if ((s_uwCubeX == s_uwCubeDestinationPointX) && (s_uwCubeY == s_uwCubeDestinationPointY)) {
-			UBYTE ubNoOtherDirections = 1;
-			for (UBYTE ubCrossSide = 0; ubCrossSide < CROSS_SIDE_COUNT; ++ubCrossSide) {
-				if (getCrossSideState(g_pMapData[s_ubCubeMapDestinationPointX][s_ubCubeMapDestinationPointY], ubCrossSide) && (ubCrossSide != s_ubCubeCrossSide) && (ubCrossSide != getOppositeCrossSide(s_ubCubeCrossSide))) {
-					ubNoOtherDirections = 0;
-					break;
-				}
-			}
-
-			s_ubCubeMapStartPointX = s_ubCubeMapDestinationPointX;
-			s_ubCubeMapStartPointY = s_ubCubeMapDestinationPointY;
-
-			s_uwCubeStartPointX = s_uwCubeDestinationPointX;
-			s_uwCubeStartPointY = s_uwCubeDestinationPointY;
-
-			if (ubNoOtherDirections && getCrossSideState(g_pMapData[s_ubCubeMapDestinationPointX][s_ubCubeMapDestinationPointY], s_ubCubeCrossSide)) {
-				setNewCubeDestination(s_ubCubeCrossSide);
-			}
-			else {
-				s_ubCubeCrossSide = CROSS_SIDE_COUNT;
-			}
-		}
-		else {
-			undrawCube(s_uwCubeX, s_uwCubeY);
-
-			addAndClampCubeCoordValue(&s_uwCubeX, s_pCubeStep[s_ubCubeCrossSide][0], s_uwCubeDestinationPointX);
-			addAndClampCubeCoordValue(&s_uwCubeY, s_pCubeStep[s_ubCubeCrossSide][1], s_uwCubeDestinationPointY);
-
-			drawCube(s_uwCubeX, s_uwCubeY);
-		}
+UBYTE isCubeMovePossible(UBYTE ubCrossSide) {
+	if (s_ubCubeMapStartPointCrossSide == s_ubCubeMapStartPointCrossSideAdjustRotation) { /* Cube is directly in cross side */
+		return getCrossSideState(g_pMapData[s_ubCubeMapStartPointX][s_ubCubeMapStartPointY], ubCrossSide) && (getOppositeCrossSide(ubCrossSide) != s_ubCubeMapStartPointCrossSide);
+	}
+	else { /* Cube is next to the cross side */
+		return (ubCrossSide == s_ubCubeMapStartPointCrossSide) || (ubCrossSide == s_ubCubeMapStartPointCrossSideAdjustRotation);
 	}
 }
 
-void addAndClampCubeCoordValue(UWORD *pCubeCoordValue, BYTE bCubeStep, UWORD uwMaxValue) {
-	if (bCubeStep < 0) {
-		*pCubeCoordValue += bCubeStep;
+void moveCube() {
+	if (s_ubCubeMoveCrossSide == CROSS_SIDE_COUNT) {
+		return;
+	}
 
-		if (*pCubeCoordValue < uwMaxValue) {
-			*pCubeCoordValue = uwMaxValue;
+	if ((s_uwCubeX == s_uwCubeDestinationPointX) && (s_uwCubeY == s_uwCubeDestinationPointY)) {
+//		UBYTE ubNoOtherDirections = 1;
+//		for (UBYTE ubCrossSide = 0; ubCrossSide < CROSS_SIDE_COUNT; ++ubCrossSide) {
+//			if (isCubeMovePossible(ubCrossSide) && (ubCrossSide != s_ubCubeMoveCrossSide) && (ubCrossSide != getOppositeCrossSide(s_ubCubeMoveCrossSide))) {
+//				ubNoOtherDirections = 0;
+//				break;
+//			}
+//		}
+
+		s_ubCubeMapStartPointX = s_ubCubeMapDestinationPointX;
+		s_ubCubeMapStartPointY = s_ubCubeMapDestinationPointY;
+		s_ubCubeMapStartPointCrossSide = s_ubCubeMapDestinationPointCrossSide;
+		s_ubCubeMapStartPointCrossSideAdjustRotation = s_ubCubeMapDestinationPointCrossSideAdjustRotation;
+
+		s_uwCubeStartPointX = s_uwCubeDestinationPointX;
+		s_uwCubeStartPointY = s_uwCubeDestinationPointY;
+
+//		if (ubNoOtherDirections && getCrossSideState(g_pMapData[s_ubCubeMapDestinationPointX][s_ubCubeMapDestinationPointY], s_ubCubeMoveCrossSide)) {
+//			setNewCubeDestination(s_ubCubeMoveCrossSide);
+//		}
+//		else {
+			s_ubCubeMoveCrossSide = CROSS_SIDE_COUNT;
+//		}
+	}
+	else {
+		logWrite("step\n");
+		logWrite("s_uwCubeX: %u\n", s_uwCubeX);
+		logWrite("s_uwCubeY: %u\n", s_uwCubeY);
+		logWrite("s_uwCubeDestinationPointX: %u\n", s_uwCubeDestinationPointX);
+		logWrite("s_uwCubeDestinationPointY: %u\n", s_uwCubeDestinationPointY);
+
+		undrawCube(s_uwCubeX, s_uwCubeY);
+
+		makeCubeStepToDestination(&s_uwCubeX, CUBE_STEP_X, s_uwCubeDestinationPointX);
+		makeCubeStepToDestination(&s_uwCubeY, s_uwCubeX == s_uwCubeDestinationPointX ? CUBE_STEP_Y_FAST : CUBE_STEP_Y_SLOW, s_uwCubeDestinationPointY);
+
+		drawCube(s_uwCubeX, s_uwCubeY);
+	}
+}
+
+void makeCubeStepToDestination(UWORD *pCubeCoordValue, UBYTE ubCubeStep, UWORD ubDestinationValue) {
+	if (*pCubeCoordValue < ubDestinationValue) {
+		*pCubeCoordValue += ubCubeStep;
+
+		if (ubDestinationValue < *pCubeCoordValue) {
+			*pCubeCoordValue = ubDestinationValue;
 		}
 	}
-	else if (0 < bCubeStep) {
-		*pCubeCoordValue += bCubeStep;
+	else if (ubDestinationValue < *pCubeCoordValue) {
+		*pCubeCoordValue -= ubCubeStep;
 
-		if (uwMaxValue < *pCubeCoordValue) {
-			*pCubeCoordValue = uwMaxValue;
+		if (*pCubeCoordValue < ubDestinationValue) {
+			*pCubeCoordValue = ubDestinationValue;
 		}
 	}
 }

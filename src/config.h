@@ -47,7 +47,9 @@
 #define CUBE_BITMAP_WIDTH 32
 #define CUBE_BITMAP_HEIGHT 32
 
-#define CUBE_ADJUST_COUNT 1
+#define CUBE_STEP_X 2
+#define CUBE_STEP_Y_SLOW 1
+#define CUBE_STEP_Y_FAST 2
 
 #define MAP_WIDTH 6
 #define MAP_HEIGHT 4

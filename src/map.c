@@ -145,8 +145,8 @@ void drawMapStartPoint() {
 		UWORD uwY = getMapCrossY(g_ubMapStartPointX, g_ubMapStartPointY);
 
 		drawCube(
-			uwX + g_pCubeCrossSideAdjust[g_ubMapStartPointCrossSide][0][0],
-			uwY + g_pCubeCrossSideAdjust[g_ubMapStartPointCrossSide][0][1]
+			uwX + g_pCubeCrossSideAdjust[g_ubMapStartPointCrossSide][g_ubMapStartPointCrossSide][0],
+			uwY + g_pCubeCrossSideAdjust[g_ubMapStartPointCrossSide][g_ubMapStartPointCrossSide][1]
 		);
 
 		if (g_ubMapStartPointCrossSide & 1) {

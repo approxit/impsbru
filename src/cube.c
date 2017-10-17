@@ -9,24 +9,54 @@
 tBitMap *g_pCubeBitMapAtlas[CUBE_ATLAS_SIZE] = {0};
 tBitmapMask *g_pCubeBitMapMaskAtlas[CUBE_ATLAS_SIZE] = {0};
 tBitMap *g_pCubeUndrawBitMap = 0;
-UBYTE g_pCubeCrossSideAdjust[CROSS_SIDE_COUNT][CUBE_ADJUST_COUNT][2] = {
+UBYTE g_pCubeCrossSideAdjust[CROSS_SIDE_COUNT][CROSS_SIDE_COUNT][2] = {
 	{ /* Cross Side A */
-		{22, 12}
+		{22, 12}, // N
+		{32, 7}, // NE
+		{32, 17}, // SE
+		{0, 0}, /* S is impossible opposite */
+		{12, 17}, // SW
+		{12, 7} // NW
 	},
 	{ /* Cross Side B */
-		{31, 17}
+		{32, 7}, // N
+		{30, 17}, // NE
+		{40, 22}, // SE
+		{30, 27}, // S
+		{0, 0}, /* SW is impossible opposite */
+		{22, 13}, // NW
 	},
 	{ /* Cross Side C */
-		{32, 26}
+		{32, 17}, // N
+		{40, 22}, // NE
+		{32, 26}, // SE
+		{32, 37}, // S
+		{22, 31}, // SW
+		{0, 0} // NW is impossible opposite */
 	},
 	{ /* Cross Side D */
-		{22, 31}
+		{0, 0}, /* N is impossible opposite */
+		{30, 27}, // NE
+		{32, 37}, // SE
+		{22, 31}, // S
+		{12, 36}, // SW
+		{14, 27} // NW
 	},
 	{ /* Cross Side E */
-		{13, 26}
+		{12, 17}, // N
+		{0, 0}, /* NE is impossible opposite */
+		{22, 31}, // SE
+		{12, 36}, // S
+		{12, 26}, // SW
+		{4, 22} // NW
 	},
 	{ /* Cross Side F */
-		{13, 16}
+		{12, 7}, // N
+		{22, 13}, // NE
+		{0, 0}, /* SE is impossible opposite */
+		{14, 27}, // S
+		{4, 22}, // SW
+		{14, 17} // NW
 	}
 };
 

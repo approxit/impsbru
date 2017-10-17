@@ -32,10 +32,17 @@ void handleMapLoadSaveActions();
 void loadCubePositionsFromMap();
 void setNewCubeDestination(UBYTE ubCrossSide);
 void swapCubePositions();
-void addAndClampCubeCoordValue(
-	UWORD *pCubeCoordValue,
-	BYTE bCubeStep,
-	UWORD uwMaxValue
+
+void makeCubeStepToDestination(
+	INOUT UWORD *pCubeCoordValue,
+	IN UBYTE ubCubeStep,
+	IN UWORD ubDestinationValue
+);
+
+void drawCubeDebugCrossSide(UWORD uwX, UWORD uwY, UBYTE ubCrossSide, UBYTE ubCrossSideAdjustRotation);
+
+UBYTE isCubeMovePossible(
+	IN UBYTE ubCrossSide
 );
 
 void moveCube();

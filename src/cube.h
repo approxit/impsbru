@@ -8,7 +8,7 @@
 
 extern tBitMap *g_pCubeBitMapAtlas[CUBE_ATLAS_SIZE];
 extern tBitmapMask *g_pCubeBitMapMaskAtlas[CUBE_ATLAS_SIZE];
-extern UBYTE g_pCubeCrossSideAdjust[CROSS_SIDE_COUNT][CUBE_ADJUST_COUNT][2];
+extern UBYTE g_pCubeCrossSideAdjust[CROSS_SIDE_COUNT][CROSS_SIDE_COUNT][2];
 
 void createCubeAtlas();
 void destroyCubeAtlas();
