@@ -34,6 +34,24 @@ void drawCross(
 	IN UBYTE ubCrossData
 );
 
+void drawCrossCenter(
+	IN UWORD uwX,
+	IN UWORD uwY,
+	IN UBYTE ubCrossData
+);
+
+void drawCrossDepthMiddle(
+	IN UWORD uwX,
+	IN UWORD uwY,
+	IN UBYTE ubCrossData
+);
+
+void drawCrossDepthTop(
+	IN UWORD uwX,
+	IN UWORD uwY,
+	IN UBYTE ubCrossData
+);
+
 void undrawCross(
 	IN UWORD uwX,
 	IN UWORD uwY

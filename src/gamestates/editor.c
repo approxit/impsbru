@@ -473,37 +473,85 @@ void moveCube() {
 		return;
 	}
 
-	if ((s_uwCubeX == s_uwCubeDestinationPointX) && (s_uwCubeY == s_uwCubeDestinationPointY)) {
-		s_ubCubeMapStartPointX = s_ubCubeMapDestinationPointX;
-		s_ubCubeMapStartPointY = s_ubCubeMapDestinationPointY;
-		s_ubCubeMapStartPointCrossSide = s_ubCubeMapDestinationPointCrossSide;
-		s_ubCubeMapStartPointCrossSideAdjustRotation = s_ubCubeMapDestinationPointCrossSideAdjustRotation;
-
-		s_uwCubeStartPointX = s_uwCubeDestinationPointX;
-		s_uwCubeStartPointY = s_uwCubeDestinationPointY;
-
-		UBYTE ubNoOtherDirections = 1;
-		for (UBYTE ubCrossSide = 0; ubCrossSide < CROSS_SIDE_COUNT; ++ubCrossSide) {
-			if (isCubeMovePossible(ubCrossSide) && (ubCrossSide != s_ubCubeMoveCrossSide) && (ubCrossSide != getOppositeCrossSide(s_ubCubeMoveCrossSide))) {
-				ubNoOtherDirections = 0;
-				break;
-			}
-		}
-
-		if (ubNoOtherDirections && getCrossSideState(g_pMapData[s_ubCubeMapStartPointX][s_ubCubeMapStartPointY], s_ubCubeMoveCrossSide) && (s_ubCubeMapStartPointCrossSide == s_ubCubeMapStartPointCrossSideAdjustRotation)) {
-			setNewCubeDestination(s_ubCubeMoveCrossSide);
-		}
-		else {
-			s_ubCubeMoveCrossSide = CROSS_SIDE_COUNT;
-		}
+	// TODO: move continuation should make step in single function call
+	if (isCubeMoveFinished()) {
+		finishCubeMove();
 	}
 	else {
-		undrawCube(s_uwCubeX, s_uwCubeY);
+		moveCubeStep();
+	}
+}
 
-		makeCubeStepToDestination(&s_uwCubeX, CUBE_STEP_X, s_uwCubeDestinationPointX);
-		makeCubeStepToDestination(&s_uwCubeY, s_uwCubeX == s_uwCubeDestinationPointX ? CUBE_STEP_Y_FAST : CUBE_STEP_Y_SLOW, s_uwCubeDestinationPointY);
+UBYTE isCubeMoveFinished() {
+	return (s_uwCubeX == s_uwCubeDestinationPointX) && (s_uwCubeY == s_uwCubeDestinationPointY);
+}
 
-		drawCube(s_uwCubeX, s_uwCubeY);
+void finishCubeMove() {
+	s_ubCubeMapStartPointX = s_ubCubeMapDestinationPointX;
+	s_ubCubeMapStartPointY = s_ubCubeMapDestinationPointY;
+	s_ubCubeMapStartPointCrossSide = s_ubCubeMapDestinationPointCrossSide;
+	s_ubCubeMapStartPointCrossSideAdjustRotation = s_ubCubeMapDestinationPointCrossSideAdjustRotation;
+
+	s_uwCubeStartPointX = s_uwCubeDestinationPointX;
+	s_uwCubeStartPointY = s_uwCubeDestinationPointY;
+
+	UBYTE ubNoOtherDirections = 1;
+	for (UBYTE ubCrossSide = 0; ubCrossSide < CROSS_SIDE_COUNT; ++ubCrossSide) {
+		if (isCubeMovePossible(ubCrossSide) && (ubCrossSide != s_ubCubeMoveCrossSide) && (ubCrossSide != getOppositeCrossSide(s_ubCubeMoveCrossSide))) {
+			ubNoOtherDirections = 0;
+			break;
+		}
+	}
+
+	if (ubNoOtherDirections && getCrossSideState(g_pMapData[s_ubCubeMapStartPointX][s_ubCubeMapStartPointY], s_ubCubeMoveCrossSide) && (s_ubCubeMapStartPointCrossSide == s_ubCubeMapStartPointCrossSideAdjustRotation)) {
+		setNewCubeDestination(s_ubCubeMoveCrossSide);
+	}
+	else {
+		s_ubCubeMoveCrossSide = CROSS_SIDE_COUNT;
+	}
+}
+
+void moveCubeStep() {
+	undrawCube(s_uwCubeX, s_uwCubeY);
+
+	makeCubeStepToDestination(&s_uwCubeX, CUBE_STEP_X, s_uwCubeDestinationPointX);
+	makeCubeStepToDestination(&s_uwCubeY, s_uwCubeX == s_uwCubeDestinationPointX ? CUBE_STEP_Y_FAST : CUBE_STEP_Y_SLOW, s_uwCubeDestinationPointY);
+
+	drawCube(s_uwCubeX, s_uwCubeY);
+
+	redrawCrossDepth(
+		s_ubCubeMapStartPointX,
+		s_ubCubeMapStartPointY,
+		s_ubCubeMapStartPointCrossSide,
+		s_ubCubeMapStartPointCrossSideAdjustRotation
+	);
+
+	redrawCrossDepth(
+		s_ubCubeMapDestinationPointX,
+		s_ubCubeMapDestinationPointY,
+		s_ubCubeMapDestinationPointCrossSide,
+		s_ubCubeMapDestinationPointCrossSideAdjustRotation
+	);
+}
+
+void redrawCrossDepth(UBYTE ubCrossMapX, UBYTE ubCrossMapY, UBYTE ubCubeCrossSideAdjustRotation, UBYTE ubCubeCrossSideAdjustRotation) {
+	UBYTE ubCubeDepth = getCubeDepth(ubCubeCrossSideAdjustRotation, ubCubeCrossSideAdjustRotation);
+
+	UWORD uwCubeStartPointX = getMapCrossX(ubCrossMapX);
+	UWORD uwCubeStartPointY = getMapCrossY(ubCrossMapX, ubCrossMapY);
+	UBYTE ubCrossData = g_pMapData[ubCrossMapX][ubCrossMapY];
+
+	if (ubCubeDepth <= CUBE_DEPTH_BOTTOM) {
+		drawCrossCenter(uwCubeStartPointX, uwCubeStartPointY, ubCrossData);
+		drawCrossDepthMiddle(uwCubeStartPointX, uwCubeStartPointY, ubCrossData);
+	}
+
+	if (ubCubeDepth <= CUBE_DEPTH_MIDDLE) {
+		drawCrossDepthTop(uwCubeStartPointX, uwCubeStartPointY, ubCrossData);
+	}
+
+	if ((ubCrossMapX == g_ubMapDestinationPointX) && (ubCrossMapY == g_ubMapDestinationPointY)) {
+		drawMapDestinationPoint();
 	}
 }
 

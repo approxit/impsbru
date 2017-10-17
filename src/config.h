@@ -51,6 +51,10 @@
 #define CUBE_STEP_Y_SLOW 1
 #define CUBE_STEP_Y_FAST 2
 
+#define CUBE_DEPTH_BOTTOM 0
+#define CUBE_DEPTH_MIDDLE 1
+#define CUBE_DEPTH_TOP 2
+
 #define MAP_WIDTH 6
 #define MAP_HEIGHT 4
 #define MAP_Y_OFFSET 17

@@ -13,8 +13,7 @@ Follow the edges of the shapes with red cube and finish the level by walking on 
 
 This game is made for specific hardware. To properly run this game you will need:
 
-* Amiga OCS/ECS (500 or better)
-* Kickstart 1.3 or better
+* Literally any Amiga (but tested with Amiga 500 and Kickstart 1.3)
 
 or compatible Amiga emulator like [WinUAE](http://www.winuae.net/).
 

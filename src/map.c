@@ -124,7 +124,6 @@ void undrawMap() {
 }
 
 void drawMapCross(UBYTE ubCrossXIndex, UBYTE ubCrossYIndex) {
-//	logWrite("drawMapCross: %ux%u\n", ubCrossXIndex, ubCrossYIndex);
 	drawCross(
 		getMapCrossX(ubCrossXIndex),
 		getMapCrossY(ubCrossXIndex, ubCrossYIndex),
@@ -190,7 +189,7 @@ void undrawMapDestinationPoint() {
 
 UBYTE saveMapToFile(char *szFilePath) {
 	logWrite("Saving %s... ", szFilePath);
-	FILE *pFile = fopen(szFilePath, "w");
+	FILE *pFile = fopen(szFilePath, "wb");
 	if (!pFile) {
 		logWrite("ERROR: can\'t open file!\n");
 		return 0;
@@ -216,7 +215,7 @@ UBYTE saveMapToFile(char *szFilePath) {
 
 UBYTE loadMapFromFile(char *szFilePath) {
 	logWrite("Loading %s... ", szFilePath);
-	FILE *pFile = fopen(szFilePath, "r");
+	FILE *pFile = fopen(szFilePath, "rb");
 	if (!pFile) {
 		logWrite("ERROR: can\'t open file!\n");
 		return 0;

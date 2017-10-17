@@ -43,16 +43,24 @@ void destroyCrossAtlas() {
 }
 
 void drawCross(UWORD uwX, UWORD uwY, UBYTE ubCrossData) {
+	drawCrossCenter(uwX, uwY, ubCrossData);
+	drawCrossDepthMiddle(uwX, uwY, ubCrossData);
+	drawCrossDepthTop(uwX, uwY, ubCrossData);
+}
+
+void drawCrossCenter(UWORD uwX, UWORD uwY, UBYTE ubCrossData) {
 	if (ubCrossData) {
 		drawCrossAtlasIndex(uwX, uwY, CROSS_CENTER);
 	}
+}
 
-	/* Draw lower cross sides */
+void drawCrossDepthMiddle(UWORD uwX, UWORD uwY, UBYTE ubCrossData) {
 	for (UBYTE ubCrossSide = 1; ubCrossSide < CROSS_SIDE_COUNT; ubCrossSide += 2) {
 		drawCrossSide(uwX, uwY, ubCrossData, ubCrossSide);
 	}
+}
 
-	/* Draw upper cross sides in reverse, due to overlapping pixels */
+void drawCrossDepthTop(UWORD uwX, UWORD uwY, UBYTE ubCrossData) {
 	for (UBYTE ubCrossSide = CROSS_SIDE_COUNT; 0 < ubCrossSide; ubCrossSide -= 2) {
 		drawCrossSide(uwX, uwY, ubCrossData, ubCrossSide - 2);
 	}
@@ -78,12 +86,6 @@ void undrawDestinationPoint(UWORD uwX, UWORD uwY) {
 }
 
 void drawCrossAtlasIndex(UWORD uwX, UWORD uwY, UBYTE ubAtlasIndex) {
-//	blitRect(
-//		g_pBufferManager->pBuffer, uwX, uwY,
-//		CROSS_WIDTH, CROSS_HEIGHT,
-//		1
-//	);
-
 	blitCopyMask(
 		g_pCrossBitMapAtlas[ubAtlasIndex], 0, 0,
 		g_pBufferManager->pBuffer, uwX, uwY,
