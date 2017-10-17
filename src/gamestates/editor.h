@@ -39,7 +39,12 @@ void makeCubeStepToDestination(
 	IN UWORD ubDestinationValue
 );
 
-void drawCubeDebugCrossSide(UWORD uwX, UWORD uwY, UBYTE ubCrossSide, UBYTE ubCrossSideAdjustRotation);
+//void drawCubeDebugCrossSide(
+//	IN UWORD uwX,
+//	IN UWORD uwY,
+//	IN UBYTE ubCrossSide,
+//	IN UBYTE ubCrossSideAdjustRotation
+//);
 
 UBYTE isCubeMovePossible(
 	IN UBYTE ubCrossSide

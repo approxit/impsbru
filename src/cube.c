@@ -12,14 +12,14 @@ tBitMap *g_pCubeUndrawBitMap = 0;
 UBYTE g_pCubeCrossSideAdjust[CROSS_SIDE_COUNT][CROSS_SIDE_COUNT][2] = {
 	{ /* Cross Side A */
 		{22, 12}, // N
-		{32, 7}, // NE
+		{30, 8}, // NE
 		{32, 17}, // SE
 		{0, 0}, /* S is impossible opposite */
 		{12, 17}, // SW
-		{12, 7} // NW
+		{14, 8} // NW
 	},
 	{ /* Cross Side B */
-		{32, 7}, // N
+		{30, 8}, // N
 		{30, 17}, // NE
 		{40, 22}, // SE
 		{30, 27}, // S
@@ -51,7 +51,7 @@ UBYTE g_pCubeCrossSideAdjust[CROSS_SIDE_COUNT][CROSS_SIDE_COUNT][2] = {
 		{4, 22} // NW
 	},
 	{ /* Cross Side F */
-		{12, 7}, // N
+		{14, 8}, // N
 		{22, 13}, // NE
 		{0, 0}, /* SE is impossible opposite */
 		{14, 27}, // S
