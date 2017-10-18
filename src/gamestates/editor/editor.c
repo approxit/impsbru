@@ -98,7 +98,9 @@ void gsEditorLoop() {
 			break;
 		case EDITOR_STEP_SHARE:
 			handleEditorStepShareActions();
-			handleMapLoadActions();
+			if (!handleMapSaveActions()) {
+				handleMapLoadActions();
+			}
 			break;
 		default:
 			handleEditorStepActions();
@@ -312,25 +314,17 @@ void handleEditorStepPlayTestActions() {
 		--s_ubEditorStep;
 		drawEditorStep();
 	}
-
-	/* Accept buttons handling */
-	if (keyUse(KEY_RETURN) || keyUse(KEY_SPACE)) {
-		undrawMap();
-
-		blitCopyAligned(
-			s_pEditorStepBitMapAtlas[EDITOR_STEP_SHARE_TEXT], 0, 0,
-			g_pBufferManager->pBuffer, 0, 115,
-			EDITOR_STEP_WIDTH, 32
-		);
-
-		++s_ubEditorStep;
-		drawEditorStep();
-	}
 }
 
 void handleEditorStepShareActions() {
 	/* Cancel buttons handling */
 	if (keyUse(KEY_ESCAPE) || keyUse(KEY_BACKSPACE)) {
+		blitRect(
+			g_pBufferManager->pBuffer, 0, 0,
+			WINDOW_SCREEN_WIDTH, WINDOW_SCREEN_HEIGHT,
+			0
+		);
+
 		drawMap();
 
 		--s_ubEditorStep;
@@ -375,7 +369,7 @@ void handleEditorStepActions() {
 	}
 }
 
-void handleMapLoadActions() {
+UBYTE handleMapLoadActions() {
 	for (UBYTE ubKey = KEY_1; ubKey <= KEY_0; ++ubKey) {
 		if (keyUse(ubKey)) {
 			char szMapFilePath[255];
@@ -389,22 +383,29 @@ void handleMapLoadActions() {
 
 				s_ubEditorStep = EDITOR_STEP_PLAY_TEST;
 				drawEditorStep();
+
+				return 1;
 			}
 		}
 	}
+
+	return 0;
 }
 
-void handleMapSaveActions() {
+UBYTE handleMapSaveActions() {
 	for (UBYTE ubKey = KEY_1; ubKey <= KEY_0; ++ubKey) {
-		if (keyUse(ubKey)) {
+		if (keyCheck(ubKey)) {
 			char szMapFilePath[255];
 			sprintf(szMapFilePath, "/data/maps/%u.map", ubKey);
 
 			if (keyCheck(KEY_LSHIFT) || keyCheck(KEY_RSHIFT)) {
 				saveMapToFile(szMapFilePath);
+				return 1;
 			}
 		}
 	}
+
+	return 0;
 }
 
 void loadCubePositionsFromMap() {
@@ -527,6 +528,11 @@ void moveCube() {
 	// TODO: move continuation should make step in single function call
 	if (isCubeMoveFinished()) {
 		finishCubeMove();
+
+		if ((s_ubCubeMapStartPointX == g_ubMapDestinationPointX) && (s_ubCubeMapStartPointY == g_ubMapDestinationPointY) && (s_ubCubeMapStartPointCrossSide == g_ubMapDestinationPointCrossSide)) {
+			finishMap();
+			return;
+		}
 	}
 	else {
 		moveCubeStep();
@@ -583,6 +589,19 @@ void moveCubeStep() {
 		s_ubCubeMapDestinationPointCrossSide,
 		s_ubCubeMapDestinationPointCrossSideAdjustRotation
 	);
+}
+
+void finishMap() {
+	undrawMap();
+
+	blitCopyAligned(
+		s_pEditorStepBitMapAtlas[EDITOR_STEP_SHARE_TEXT], 0, 0,
+		g_pBufferManager->pBuffer, 0, 115,
+		EDITOR_STEP_WIDTH, 32
+	);
+
+	++s_ubEditorStep;
+	drawEditorStep();
 }
 
 void redrawCrossDepth(UBYTE ubCrossMapX, UBYTE ubCrossMapY, UBYTE ubCubeCrossSideAdjustRotation, UBYTE ubCubeCrossSideAdjustRotation) {

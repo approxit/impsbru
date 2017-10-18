@@ -30,8 +30,9 @@ void handleEditorStepShareActions();
 
 void handleMapCursorActions();
 void handleEditorStepActions();
-void handleMapLoadActions();
-void handleMapSaveActions();
+
+UBYTE handleMapLoadActions();
+UBYTE handleMapSaveActions();
 
 void loadCubePositionsFromMap();
 void setNewCubeDestination(UBYTE ubCrossSide);
@@ -58,6 +59,7 @@ void moveCube();
 UBYTE isCubeMoveFinished();
 void finishCubeMove();
 void moveCubeStep();
+void finishMap();
 
 void redrawCrossDepth(
 	IN UBYTE ubCrossMapX,
