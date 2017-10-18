@@ -8,8 +8,9 @@
 #define EDITOR_STEP_DESTINATION_POINT 2
 #define EDITOR_STEP_PLAY_TEST 3
 #define EDITOR_STEP_SHARE 4
+#define EDITOR_STEP_SHARE_TEXT 5
 #define EDITOR_STEP_COUNT 5
-#define EDITOR_STEP_ATLAS_SIZE 5
+#define EDITOR_STEP_ATLAS_SIZE 6
 
 #define EDITOR_STEP_WIDTH WINDOW_SCREEN_WIDTH
 #define EDITOR_STEP_HEIGHT 22
@@ -25,9 +26,12 @@ void handleEditorStepCreateActions();
 void handleEditorStepStartPointActions();
 void handleEditorStepDestinationPointActions();
 void handleEditorStepPlayTestActions();
+void handleEditorStepShareActions();
+
 void handleMapCursorActions();
 void handleEditorStepActions();
-void handleMapLoadSaveActions();
+void handleMapLoadActions();
+void handleMapSaveActions();
 
 void loadCubePositionsFromMap();
 void setNewCubeDestination(UBYTE ubCrossSide);

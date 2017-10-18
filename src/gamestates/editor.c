@@ -86,11 +86,15 @@ void gsEditorLoop() {
 			handleEditorStepPlayTestActions();
 			moveCube();
 			break;
+		case EDITOR_STEP_SHARE:
+			handleEditorStepShareActions();
+			handleMapLoadActions();
+			break;
 		default:
 			handleEditorStepActions();
 	}
 
-	handleMapLoadSaveActions();
+	handleMapLoadActions();
 }
 
 void gsEditorDestroy() {
@@ -107,6 +111,7 @@ void createEditorStepAtlas() {
 	createAtlasFile(s_pEditorStepBitMapAtlas, EDITOR_STEP_DESTINATION_POINT, "/data/editor_frames/destination_point.bm");
 	createAtlasFile(s_pEditorStepBitMapAtlas, EDITOR_STEP_PLAY_TEST, "/data/editor_frames/play_test.bm");
 	createAtlasFile(s_pEditorStepBitMapAtlas, EDITOR_STEP_SHARE, "/data/editor_frames/share.bm");
+	createAtlasFile(s_pEditorStepBitMapAtlas, EDITOR_STEP_SHARE_TEXT, "/data/editor_frames/share1.bm");
 }
 
 void destroyEditorStepAtlas() {
@@ -292,7 +297,25 @@ void handleEditorStepPlayTestActions() {
 
 	/* Accept buttons handling */
 	if (keyUse(KEY_RETURN) || keyUse(KEY_SPACE)) {
+		undrawMap();
+
+		blitCopyAligned(
+			s_pEditorStepBitMapAtlas[EDITOR_STEP_SHARE_TEXT], 0, 0,
+			g_pBufferManager->pBuffer, 0, 115,
+			EDITOR_STEP_WIDTH, 32
+		);
+
 		++s_ubEditorStep;
+		drawEditorStep();
+	}
+}
+
+void handleEditorStepShareActions() {
+	/* Cancel buttons handling */
+	if (keyUse(KEY_ESCAPE) || keyUse(KEY_BACKSPACE)) {
+		drawMap();
+
+		--s_ubEditorStep;
 		drawEditorStep();
 	}
 }
@@ -334,16 +357,13 @@ void handleEditorStepActions() {
 	}
 }
 
-void handleMapLoadSaveActions() {
+void handleMapLoadActions() {
 	for (UBYTE ubKey = KEY_1; ubKey <= KEY_0; ++ubKey) {
 		if (keyUse(ubKey)) {
 			char szMapFilePath[255];
 			sprintf(szMapFilePath, "/data/maps/%u.map", ubKey);
 
-			if (keyCheck(KEY_LSHIFT) || keyCheck(KEY_RSHIFT)) {
-				saveMapToFile(szMapFilePath);
-			}
-			else if (loadMapFromFile(szMapFilePath)) {
+			if (loadMapFromFile(szMapFilePath)) {
 				loadCubePositionsFromMap();
 
 				undrawMap();
@@ -351,6 +371,19 @@ void handleMapLoadSaveActions() {
 
 				s_ubEditorStep = EDITOR_STEP_PLAY_TEST;
 				drawEditorStep();
+			}
+		}
+	}
+}
+
+void handleMapSaveActions() {
+	for (UBYTE ubKey = KEY_1; ubKey <= KEY_0; ++ubKey) {
+		if (keyUse(ubKey)) {
+			char szMapFilePath[255];
+			sprintf(szMapFilePath, "/data/maps/%u.map", ubKey);
+
+			if (keyCheck(KEY_LSHIFT) || keyCheck(KEY_RSHIFT)) {
+				saveMapToFile(szMapFilePath);
 			}
 		}
 	}
