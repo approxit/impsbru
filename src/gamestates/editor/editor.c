@@ -1,4 +1,4 @@
-#include "gamestates/editor.h"
+#include "gamestates/editor/editor.h"
 
 #include <ace/managers/log.h>
 #include <ace/managers/key.h>
@@ -11,6 +11,8 @@
 #include "cube.h"
 #include "map.h"
 #include "atlas.h"
+
+#include "gamestates/menu/menu.h"
 
 static UBYTE s_ubMapCursorX = 0;
 static UBYTE s_ubMapCursorY = 0;
@@ -59,9 +61,17 @@ static BYTE s_pCubeStep[CROSS_SIDE_COUNT][2] = {
 void gsEditorCreate() {
 	logWrite("gsEditorCreate\n");
 
+	g_sGameManager.pStateFirst->pView = g_pView;
+
 	createCrossAtlas();
 	createCubeAtlas();
 	createEditorStepAtlas();
+
+	blitRect(
+		g_pBufferManager->pBuffer, 0, 0,
+		WINDOW_SCREEN_WIDTH, WINDOW_SCREEN_HEIGHT,
+		0
+	);
 
 	drawEditorStep();
 	drawMap();
@@ -99,6 +109,14 @@ void gsEditorLoop() {
 
 void gsEditorDestroy() {
 	logWrite("gsEditorDestroy\n");
+
+	blitRect(
+		g_pBufferManager->pBuffer, 0, 0,
+		WINDOW_SCREEN_WIDTH, WINDOW_SCREEN_HEIGHT,
+		0
+	);
+
+	drawLogo();
 
 	destroyCrossAtlas();
 	destroyCubeAtlas();
@@ -147,7 +165,7 @@ void handleEditorStepCreateActions() {
 		}
 
 		if (ubIsMapEmpty) {
-			gameClose();
+			gamePopState();
 		}
 		else {
 			memset(g_pMapData, 0, MAP_WIDTH * MAP_HEIGHT);

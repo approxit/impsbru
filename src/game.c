@@ -9,7 +9,7 @@
 #include <ace/utils/extview.h>
 #include <ace/utils/palette.h>
 
-#include "gamestates/editor.h"
+#include "gamestates/menu/menu.h"
 
 const UWORD WINDOW_SCREEN_WIDTH = 320;
 const UWORD WINDOW_SCREEN_HEIGHT = 256;
@@ -41,7 +41,7 @@ void genericCreate() {
 
 	viewLoad(g_pView);
 
-	gamePushState(gsEditorCreate, gsEditorLoop, gsEditorDestroy);
+	gamePushState(gsMenuCreate, gsMenuLoop, gsMenuDestroy);
 }
 
 void genericProcess() {
