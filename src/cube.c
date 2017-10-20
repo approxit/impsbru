@@ -63,8 +63,7 @@ tBitMap *s_pCubeUndrawBitMap = 0;
 
 void createCubeAtlas() {
 	createAtlasFileWithMask(s_pCubeBitMapAtlas, g_pCubeBitMapMaskAtlas, 0, "/data/cube_frames/cube.bm", "/data/cube_frames/cube.msk");
-	// FIXME: +1 in bitmap width is needed to avoid blitter bug
-	s_pCubeUndrawBitMap = bitmapCreate(CUBE_BITMAP_WIDTH + 1, CUBE_BITMAP_HEIGHT, WINDOW_SCREEN_BPP, BMF_CLEAR);
+	s_pCubeUndrawBitMap = bitmapCreate(CUBE_BITMAP_WIDTH, CUBE_BITMAP_HEIGHT, WINDOW_SCREEN_BPP, BMF_CLEAR);
 }
 
 void destroyCubeAtlas() {
@@ -86,7 +85,7 @@ void drawCube(UWORD uwX, UWORD uwY) {
 	blitCopy(
 		g_pBufferManager->pBuffer, uwX, uwY,
 		s_pCubeUndrawBitMap, 0, 0,
-		CUBE_BITMAP_WIDTH, CUBE_BITMAP_HEIGHT,
+		CUBE_WIDTH, CUBE_HEIGHT,
 		MINTERM_COOKIE, 0xFF
 	);
 
@@ -94,11 +93,11 @@ void drawCube(UWORD uwX, UWORD uwY) {
 }
 
 void undrawCube(UWORD uwX, UWORD uwY) {
-	blitCopy(
+	blitCopyMask(
 		s_pCubeUndrawBitMap, 0, 0,
 		g_pBufferManager->pBuffer, uwX, uwY,
-		CUBE_BITMAP_WIDTH, CUBE_BITMAP_HEIGHT,
-		MINTERM_COOKIE, 0xFF
+		CUBE_WIDTH, CUBE_HEIGHT,
+		g_pCubeBitMapMaskAtlas[0]->pData
 	);
 }
 

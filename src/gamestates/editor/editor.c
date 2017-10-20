@@ -575,20 +575,19 @@ void moveCubeStep() {
 	makeCubeStepToDestination(&s_uwCubeY, s_uwCubeX == s_uwCubeDestinationPointX ? CUBE_STEP_Y_FAST : CUBE_STEP_Y_SLOW, s_uwCubeDestinationPointY);
 
 	drawCube(s_uwCubeX, s_uwCubeY);
-
-	redrawCrossDepth(
-		s_ubCubeMapStartPointX,
-		s_ubCubeMapStartPointY,
-		s_ubCubeMapStartPointCrossSide,
-		s_ubCubeMapStartPointCrossSideAdjustRotation
-	);
-
-	redrawCrossDepth(
-		s_ubCubeMapDestinationPointX,
-		s_ubCubeMapDestinationPointY,
-		s_ubCubeMapDestinationPointCrossSide,
-		s_ubCubeMapDestinationPointCrossSideAdjustRotation
-	);
+//	redrawCrossDepth(
+//		s_ubCubeMapStartPointX,
+//		s_ubCubeMapStartPointY,
+//		s_ubCubeMapStartPointCrossSide,
+//		s_ubCubeMapStartPointCrossSideAdjustRotation
+//	);
+//
+//	redrawCrossDepth(
+//		s_ubCubeMapDestinationPointX,
+//		s_ubCubeMapDestinationPointY,
+//		s_ubCubeMapDestinationPointCrossSide,
+//		s_ubCubeMapDestinationPointCrossSideAdjustRotation
+//	);
 }
 
 void finishMap() {
