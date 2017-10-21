@@ -4,6 +4,8 @@
 #include <ace/managers/key.h>
 #include <ace/managers/game.h>
 #include <ace/managers/blit.h>
+#include <ace/utils/bitmap.h>
+#include <ace/utils/bitmapmask.h>
 #include <ace/macros.h>
 
 #include "game.h"
@@ -253,7 +255,7 @@ void handleEditorStepDestinationPointActions() {
 	if (keyUse(KEY_ESCAPE) || keyUse(KEY_BACKSPACE)) {
 		undrawMapDestinationPoint();
 
-		if ((g_ubMapDestinationPointX == g_ubMapStartPointX) && (g_ubMapDestinationPointY == g_ubMapStartPointX)) {
+		if ((g_ubMapDestinationPointX == g_ubMapStartPointX) && (g_ubMapDestinationPointY == g_ubMapStartPointY)) {
 			drawMapStartPoint();
 		}
 
@@ -455,6 +457,8 @@ void setNewCubeDestination(UBYTE ubCrossSide) {
 
 	s_ubCubeMoveCrossSide = ubCrossSide;
 
+	cacheCubeDepth();
+//
 //	drawCubeDebugCrossSide(
 //		0,
 //		WINDOW_SCREEN_HEIGHT - CROSS_HEIGHT,
@@ -470,20 +474,20 @@ void setNewCubeDestination(UBYTE ubCrossSide) {
 //	);
 }
 
-//void drawCubeDebugCrossSide(UWORD uwX, UWORD uwY, UBYTE ubCrossSide, UBYTE ubCrossSideAdjustRotation) {
-//	undrawCross(uwX, uwY);
-//	drawCrossAtlasIndex(uwX, uwY, CROSS_CENTER);
-//
-//	drawCubeAtlasIndex(
-//		uwX + g_pCubeCrossSideAdjust[ubCrossSide][ubCrossSideAdjustRotation][0],
-//		uwY + g_pCubeCrossSideAdjust[ubCrossSide][ubCrossSideAdjustRotation][1],
-//		0
-//	);
-//
-//	if (ubCrossSide & 1) {
-//		drawCrossAtlasIndex(uwX, uwY, CROSS_CENTER);
-//	}
-//}
+void drawCubeDebugCrossSide(UWORD uwX, UWORD uwY, UBYTE ubCrossSide, UBYTE ubCrossSideAdjustRotation) {
+	undrawCross(uwX, uwY);
+	drawCrossAtlasIndex(uwX, uwY, CROSS_CENTER);
+
+	drawCubeAtlasIndex(
+		uwX + g_pCubeCrossSideAdjust[ubCrossSide][ubCrossSideAdjustRotation][0],
+		uwY + g_pCubeCrossSideAdjust[ubCrossSide][ubCrossSideAdjustRotation][1],
+		0
+	);
+
+	if (ubCrossSide & 1) {
+		drawCrossAtlasIndex(uwX, uwY, CROSS_CENTER);
+	}
+}
 
 void swapCubePositions() {
 	UBYTE ubCubeMapStartPointX = s_ubCubeMapStartPointX;
@@ -574,7 +578,7 @@ void moveCubeStep() {
 	makeCubeStepToDestination(&s_uwCubeX, CUBE_STEP_X, s_uwCubeDestinationPointX);
 	makeCubeStepToDestination(&s_uwCubeY, s_uwCubeX == s_uwCubeDestinationPointX ? CUBE_STEP_Y_FAST : CUBE_STEP_Y_SLOW, s_uwCubeDestinationPointY);
 
-	drawCube(s_uwCubeX, s_uwCubeY);
+	drawCubeWithDepth(s_uwCubeX, s_uwCubeY);
 //	redrawCrossDepth(
 //		s_ubCubeMapStartPointX,
 //		s_ubCubeMapStartPointY,
@@ -667,6 +671,65 @@ void toggleNeighborCrossSideState(UBYTE ubCrossXIndex, UBYTE ubCrossYIndex, UBYT
 
 	undrawCross(uwX, uwY);
 	drawCross(uwX, uwY, g_pMapData[ubMapNeighborX][ubMapNeighborY]);
+}
+
+void cacheCubeDepth() {
+	blitRect(
+		g_pCubeMapDepthMask, 0, 0,
+		WINDOW_SCREEN_WIDTH, WINDOW_SCREEN_HEIGHT, 0
+	);
+
+	cacheCubeDepthMapPoint(s_ubCubeMapStartPointX, s_ubCubeMapStartPointY, getCubeDepth(s_ubCubeMapStartPointCrossSide, s_ubCubeMapStartPointCrossSideAdjustRotation));
+	cacheCubeDepthMapPoint(s_ubCubeMapDestinationPointX, s_ubCubeMapDestinationPointY, getCubeDepth(s_ubCubeMapDestinationPointCrossSide, s_ubCubeMapDestinationPointCrossSideAdjustRotation));
+
+//	tBitmapMask sBottomDepthMask;
+//	sBottomDepthMask.pData = (UWORD *) g_pCubeMapDepthMask->Planes[0];
+//	sBottomDepthMask.uwWidth = WINDOW_SCREEN_WIDTH;
+//	sBottomDepthMask.uwHeight = WINDOW_SCREEN_HEIGHT;
+//	bitmapMaskSaveBmp(&sBottomDepthMask, "map_mask.bmp");
+}
+
+void cacheCubeDepthMapPoint(UBYTE ubMapPointX, UBYTE ubMapPointY, UBYTE ubCubeDepth) {
+	if (ubCubeDepth == CUBE_DEPTH_BOTTOM) {
+		for (UBYTE ubCrossSide = 0; ubCrossSide < CROSS_SIDE_COUNT; ++ubCrossSide) {
+			if (getCrossSideState(g_pMapData[ubMapPointX][ubMapPointY], ubCrossSide)) {
+				cacheCubeDepthCrossSide(ubMapPointX, ubMapPointY, ubCrossSide);
+			}
+		}
+	}
+
+	if (ubCubeDepth == CUBE_DEPTH_MIDDLE) {
+		for (UBYTE ubCrossSide = 0; ubCrossSide < CROSS_SIDE_COUNT; ubCrossSide += 2) {
+			if (getCrossSideState(g_pMapData[ubMapPointX][ubMapPointY], ubCrossSide)) {
+				cacheCubeDepthCrossSide(ubMapPointX, ubMapPointY, ubCrossSide);
+			}
+		}
+	}
+}
+
+void cacheCubeDepthCrossSide(UBYTE ubCrossXIndex, UBYTE ubCrossYIndex, UBYTE ubCrossSide) {
+	UWORD uwX, uwY;
+	tBitMap sCrossSideMaskBitmap;
+	InitBitMap(&sCrossSideMaskBitmap, 1, CROSS_WIDTH, CROSS_HEIGHT);
+
+	uwX = getMapCrossX(ubCrossXIndex);
+	uwY = getMapCrossY(ubCrossXIndex, ubCrossYIndex);
+
+	sCrossSideMaskBitmap.Planes[0] = (PLANEPTR) g_pCrossBitMapMaskAtlas[CROSS_CENTER]->pData;
+	blitCopyMask(
+		&sCrossSideMaskBitmap, 0, 0,
+		g_pCubeMapDepthMask, uwX, uwY,
+		CROSS_WIDTH, CROSS_HEIGHT,
+		g_pCrossBitMapMaskAtlas[CROSS_CENTER]->pData
+	);
+
+	sCrossSideMaskBitmap.Planes[0] = (PLANEPTR) g_pCrossBitMapMaskAtlas[ubCrossSide]->pData;
+	blitCopyMask(
+		&sCrossSideMaskBitmap, 0, 0,
+		g_pCubeMapDepthMask, uwX, uwY,
+		CROSS_WIDTH, CROSS_HEIGHT,
+		g_pCrossBitMapMaskAtlas[ubCrossSide]->pData
+	);
 }
 
 void drawEditorStep() {

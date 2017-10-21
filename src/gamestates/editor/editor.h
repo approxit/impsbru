@@ -61,6 +61,8 @@ void finishCubeMove();
 void moveCubeStep();
 void finishMap();
 
+void drawCubeDebugCrossSide(UWORD uwX, UWORD uwY, UBYTE ubCrossSide, UBYTE ubCrossSideAdjustRotation);
+
 void redrawCrossDepth(
 	IN UBYTE ubCrossMapX,
 	IN UBYTE ubCrossMapY,
@@ -79,6 +81,10 @@ void toggleNeighborCrossSideState(
 	IN UBYTE ubCrossYIndex,
 	IN UBYTE ubCrossSide
 );
+
+void cacheCubeDepth();
+void cacheCubeDepthMapPoint(UBYTE ubMapPointX, UBYTE ubMapPointY, UBYTE ubCubeDepth);
+void cacheCubeDepthCrossSide(UBYTE ubCrossXIndex, UBYTE ubCrossYIndex, UBYTE ubCrossSide);
 
 void drawEditorStep();
 void drawCursor();
