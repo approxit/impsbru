@@ -212,3 +212,24 @@ void blitCubeWithDepth(
 		custom.bltsize = (wHeight << 6) | uwBlitWords;
 	}
 }
+
+void waitForPos(UWORD uwPos) {
+	UWORD uwEndPos;
+	UWORD uwCurrFrame;
+
+	// Determine VPort end position
+	uwEndPos = g_pVPort->uwOffsY + uwPos + 0x2C; // Addition from DiWStrt
+	if(vhPosRegs->uwPosY < uwEndPos) {
+		// If current beam is before pos, wait for pos @ current frame
+		while(vhPosRegs->uwPosY < uwEndPos);
+	}
+	else {
+		uwCurrFrame = g_sTimerManager.uwFrameCounter;
+		while(
+			vhPosRegs->uwPosY < uwEndPos ||
+			g_sTimerManager.uwFrameCounter == uwCurrFrame
+		);
+	}
+
+	// Otherwise wait for pos @ next frame
+}

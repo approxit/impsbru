@@ -47,4 +47,8 @@ void blitCubeWithDepth(
 	UWORD uwMinterm
 );
 
+void waitForPos(
+	IN UWORD uwPos
+);
+
 #endif

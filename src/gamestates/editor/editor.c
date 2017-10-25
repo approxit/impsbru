@@ -573,6 +573,8 @@ void finishCubeMove() {
 }
 
 void moveCubeStep() {
+	waitForPos(s_uwCubeY + CUBE_HEIGHT);
+
 	undrawCube(s_uwCubeX, s_uwCubeY);
 
 	makeCubeStepToDestination(&s_uwCubeX, CUBE_STEP_X, s_uwCubeDestinationPointX);
