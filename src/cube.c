@@ -2,11 +2,13 @@
 
 #include <ace/managers/blit.h>
 
+#include <ace/utils/custom.h>
+
 #include "config.h"
 #include "game.h"
 #include "atlas.h"
 
-tBitmapMask *g_pCubeBitMapMaskAtlas[CUBE_ATLAS_SIZE] = {0};
+tBitMap *g_pCubeBitMapMaskAtlas[CUBE_ATLAS_SIZE] = {0};
 UBYTE g_pCubeCrossSideAdjust[CROSS_SIDE_COUNT][CROSS_SIDE_COUNT][2] = {
 	{ /* Cross Side A */
 		{22, 12}, // N
@@ -64,7 +66,7 @@ tBitMap *s_pCubeBitMapAtlas[CUBE_ATLAS_SIZE] = {0};
 tBitMap *s_pCubeUndrawBitMap = 0;
 
 void createCubeAtlas() {
-	createAtlasFileWithMask(s_pCubeBitMapAtlas, g_pCubeBitMapMaskAtlas, 0, "/data/cube_frames/cube.bm", "/data/cube_frames/cube.msk");
+	createAtlasFileWithMask(s_pCubeBitMapAtlas, g_pCubeBitMapMaskAtlas, 0, "data/cube_frames/cube.bm", "data/cube_frames/cube_mask.bm");
 	s_pCubeUndrawBitMap = bitmapCreate(CUBE_BITMAP_WIDTH, CUBE_BITMAP_HEIGHT, WINDOW_SCREEN_BPP, BMF_CLEAR);
 	g_pCubeMapDepthMask = bitmapCreate(WINDOW_SCREEN_WIDTH, WINDOW_SCREEN_HEIGHT, 1, BMF_CLEAR);
 	g_pCubeDepthMask = bitmapCreate(CUBE_BITMAP_WIDTH, CUBE_BITMAP_HEIGHT, 1, BMF_CLEAR);
@@ -88,148 +90,33 @@ UBYTE getCubeDepth(UBYTE ubCrossSide, UBYTE ubCrossSideAdjustRotation) {
 }
 
 void drawCube(UWORD uwX, UWORD uwY) {
-	blitCopy(
-		g_pBufferManager->pBuffer, uwX, uwY,
-		s_pCubeUndrawBitMap, 0, 0,
-		CUBE_WIDTH, CUBE_HEIGHT,
-		MINTERM_COOKIE, 0xFF
-	);
-
+	cacheCubeBacground(uwX, uwY);
 	drawCubeAtlasIndex(uwX, uwY, 0);
 }
 
-void undrawCube(UWORD uwX, UWORD uwY) {
-	blitCopyMask(
-		s_pCubeUndrawBitMap, 0, 0,
-		g_pBufferManager->pBuffer, uwX, uwY,
-		CUBE_WIDTH, CUBE_HEIGHT,
-		g_pCubeBitMapMaskAtlas[0]->pData
-	);
-}
-
-void drawCubeWithDepth(UWORD uwX, UWORD uwY) {
+void cacheCubeBacground(UWORD uwX, UWORD uwY) {
 	blitCopy(
-		g_pBufferManager->pBuffer, uwX, uwY,
+		g_pBufferManager->pBack, uwX, uwY,
 		s_pCubeUndrawBitMap, 0, 0,
 		CUBE_WIDTH, CUBE_HEIGHT,
 		MINTERM_COOKIE, 0xFF
 	);
+}
 
-	logWrite("%hhux%hhu\n", uwX, uwY);
-
-//	blitRect(
-//		g_pCubeDepthMask, 0, 0,
-//		CUBE_BITMAP_WIDTH, CUBE_BITMAP_HEIGHT,
-//		0
-//	);
-
-	BltBitMap(
-		g_pCubeMapDepthMask, uwX, uwY,
-		g_pCubeDepthMask, 0, 0,
-		CUBE_BITMAP_WIDTH, CUBE_BITMAP_HEIGHT,
-		MINTERM_COOKIE, 0xFF, 0
-	);
-
-//	tBitmapMask sBottomDepthMask;
-//	sBottomDepthMask.pData = (UWORD *) g_pCubeDepthMask->Planes[0];
-//	sBottomDepthMask.uwWidth = CUBE_BITMAP_WIDTH;
-//	sBottomDepthMask.uwHeight = CUBE_BITMAP_HEIGHT;
-//	bitmapMaskSaveBmp(&sBottomDepthMask, "fragment_mask.bmp");
-
-	tBitMap sCrossSideMaskBitmap;
-	InitBitMap(&sCrossSideMaskBitmap, 1, CUBE_BITMAP_WIDTH, CUBE_BITMAP_HEIGHT);
-	sCrossSideMaskBitmap.Planes[0] = (PLANEPTR) g_pCubeBitMapMaskAtlas[0]->pData;
-
-	BltBitMap(
-		&sCrossSideMaskBitmap, 0, 0,
-		g_pCubeDepthMask, 0, 0,
-		CUBE_BITMAP_WIDTH, CUBE_BITMAP_HEIGHT,
-		0x44, 0xFF, 0
-	);
-
-//	sBottomDepthMask.pData = (UWORD *) g_pCubeDepthMask->Planes[0];
-//	sBottomDepthMask.uwWidth = CUBE_BITMAP_WIDTH;
-//	sBottomDepthMask.uwHeight = CUBE_BITMAP_HEIGHT;
-//	bitmapMaskSaveBmp(&sBottomDepthMask, "merge_mask.bmp");
-
-	blitCopyMask(
-		s_pCubeBitMapAtlas[0], 0, 0,
-		g_pBufferManager->pBuffer, uwX, uwY,
+void undrawCube(UWORD uwX, UWORD uwY) {
+	blitCopy(
+		s_pCubeUndrawBitMap, 0, 0,
+		g_pBufferManager->pBack, uwX, uwY,
 		CUBE_WIDTH, CUBE_HEIGHT,
-		(UWORD *) g_pCubeDepthMask->Planes[0]
+		MINTERM_COOKIE, 0xFF
 	);
 }
 
 void drawCubeAtlasIndex(UWORD uwX, UWORD uwY, UBYTE ubAtlasIndex) {
 	blitCopyMask(
 		s_pCubeBitMapAtlas[ubAtlasIndex], 0, 0,
-		g_pBufferManager->pBuffer, uwX, uwY,
+		g_pBufferManager->pBack, uwX, uwY,
 		CUBE_WIDTH, CUBE_HEIGHT,
-		g_pCubeBitMapMaskAtlas[ubAtlasIndex]->pData
+		(const UWORD *) g_pCubeBitMapMaskAtlas[ubAtlasIndex]->Planes[0]
 	);
-}
-
-void blitCubeWithDepth(
-	tBitMap *pSrc, WORD wSrcX, WORD wSrcY,
-	tBitMap *pDst, WORD wDstX, WORD wDstY,
-	WORD wWidth, WORD wHeight, UWORD *pMsk, UWORD uwMinterm
-) {
-	WORD wDstModulo, wSrcModulo;
-	UBYTE ubPlane;
-
-	UBYTE ubSrcOffs = wSrcX & 0xF;
-	UBYTE ubDstOffs = wDstX & 0xF;
-
-	UWORD uwBlitWidth = (wWidth+ubDstOffs+15) & 0xFFF0;
-	UWORD uwBlitWords = uwBlitWidth >> 4;
-
-	UWORD uwFirstMask = 0xFFFF;
-	UWORD uwLastMask = 0xFFFF;
-
-	UWORD uwBltCon1 = (ubDstOffs-ubSrcOffs) << BSHIFTSHIFT;
-	UWORD uwBltCon0 = USEA|USEB|USED | uwMinterm;
-
-	ULONG ulSrcOffs = pSrc->BytesPerRow * wSrcY + (wSrcX>>3);
-	ULONG ulDstOffs = pDst->BytesPerRow * wDstY + (wDstX>>3);
-
-	wSrcModulo = pSrc->BytesPerRow - (uwBlitWords<<1);
-	wDstModulo = pDst->BytesPerRow - (uwBlitWords<<1);
-	WaitBlit();
-	custom.bltcon0 = uwBltCon0;
-	custom.bltcon1 = uwBltCon1;
-	custom.bltafwm = uwFirstMask;
-	custom.bltalwm = uwLastMask;
-
-	custom.bltamod = wDstModulo;
-	custom.bltbmod = wSrcModulo;
-	custom.bltdmod = wDstModulo;
-	for(ubPlane = pSrc->Depth; ubPlane--;) {
-		WaitBlit();
-		custom.bltapt  = (UBYTE*)((ULONG)pMsk + ulDstOffs);
-		custom.bltbpt  = (UBYTE*)(((ULONG)(pSrc->Planes[ubPlane])) + ulSrcOffs);
-		custom.bltdpt  = (UBYTE*)(((ULONG)(pDst->Planes[ubPlane])) + ulDstOffs);
-
-		custom.bltsize = (wHeight << 6) | uwBlitWords;
-	}
-}
-
-void waitForPos(UWORD uwPos) {
-	UWORD uwEndPos;
-	UWORD uwCurrFrame;
-
-	// Determine VPort end position
-	uwEndPos = g_pVPort->uwOffsY + uwPos + 0x2C; // Addition from DiWStrt
-	if(vhPosRegs->uwPosY < uwEndPos) {
-		// If current beam is before pos, wait for pos @ current frame
-		while(vhPosRegs->uwPosY < uwEndPos);
-	}
-	else {
-		uwCurrFrame = g_sTimerManager.uwFrameCounter;
-		while(
-			vhPosRegs->uwPosY < uwEndPos ||
-			g_sTimerManager.uwFrameCounter == uwCurrFrame
-		);
-	}
-
-	// Otherwise wait for pos @ next frame
 }

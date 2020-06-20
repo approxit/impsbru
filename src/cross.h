@@ -2,83 +2,82 @@
 #define GUARD_IMPSBRU_CROSS_H
 
 #include <ace/utils/bitmap.h>
-#include <ace/utils/bitmapmask.h>
 
 #include "config.h"
 
 extern tBitMap *g_pCrossBitMapAtlas[CROSS_ATLAS_SIZE];
-extern tBitmapMask *g_pCrossBitMapMaskAtlas[CROSS_ATLAS_SIZE];
+extern tBitMap *g_pCrossBitMapMaskAtlas[CROSS_ATLAS_SIZE];
 
 UBYTE getCrossSideState(
-	IN UBYTE ubCrossData,
-	IN UBYTE ubCrossSide
+	UBYTE ubCrossData,
+	UBYTE ubCrossSide
 );
 
 UBYTE getOppositeCrossSide(
-	IN UBYTE ubCrossSide
+	UBYTE ubCrossSide
 );
 
 void createCrossAtlas();
 
 void createCrossAtlasFile(
-	IN UBYTE ubAtlasIndex,
-	IN char *szBitMapFilePath,
-	IN char *szBitMapMaskFilePath
+	UBYTE ubAtlasIndex,
+	char *szBitMapFilePath,
+	char *szBitMapMaskFilePath
 );
 
 void destroyCrossAtlas();
 
 void drawCross(
-	IN UWORD uwX,
-	IN UWORD uwY,
-	IN UBYTE ubCrossData
+	UWORD uwX,
+	UWORD uwY,
+	UBYTE ubCrossData
 );
 
 void drawCrossCenter(
-	IN UWORD uwX,
-	IN UWORD uwY,
-	IN UBYTE ubCrossData
+	UWORD uwX,
+	UWORD uwY,
+	UBYTE ubCrossData
 );
 
 void drawCrossDepthMiddle(
-	IN UWORD uwX,
-	IN UWORD uwY,
-	IN UBYTE ubCrossData
+	UWORD uwX,
+	UWORD uwY,
+	UBYTE ubCrossData
 );
 
 void drawCrossDepthTop(
-	IN UWORD uwX,
-	IN UWORD uwY,
-	IN UBYTE ubCrossData
+	UWORD uwX,
+	UWORD uwY,
+	UBYTE ubCrossData
 );
 
 void undrawCross(
-	IN UWORD uwX,
-	IN UWORD uwY
+	UWORD uwX,
+	UWORD uwY
 );
 
 void drawCrossSide(
-	IN UWORD uwX,
-	IN UWORD uwY,
-	IN UBYTE ubCrossData,
-	IN UBYTE ubCrossSide
+	UWORD uwX,
+	UWORD uwY,
+	UBYTE ubCrossData,
+	UBYTE ubCrossSide
 );
 
 void drawDestinationPoint(
-	IN UWORD uwX,
-	IN UWORD uwY,
-	IN UBYTE ubDestinationPointSide
+	UWORD uwX,
+	UWORD uwY,
+	UBYTE ubDestinationPointSide
 );
 
 void undrawDestinationPoint(
-	IN UWORD uwX,
-	IN UWORD uwY
+	UWORD uwX,
+	UWORD uwY
 );
 
 void drawCrossAtlasIndex(
-	IN UWORD uwX,
-	IN UWORD uwY,
-	IN UBYTE ubAtlasIndex
+	UWORD uwX,
+	UWORD uwY,
+	UBYTE ubAtlasIndex
 );
 
 #endif

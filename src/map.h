@@ -9,80 +9,82 @@ extern UBYTE g_pMapData[MAP_WIDTH][MAP_HEIGHT];
 extern UBYTE g_ubMapStartPointX;
 extern UBYTE g_ubMapStartPointY;
 extern UBYTE g_ubMapStartPointCrossSide;
-extern UBYTE g_ubMapDestinationPointX;
-extern UBYTE g_ubMapDestinationPointY;
-extern UBYTE g_ubMapDestinationPointCrossSide;
+extern UBYTE g_ubMapFinishPointX;
+extern UBYTE g_ubMapFinishPointY;
+extern UBYTE g_ubMapFinishPointCrossSide;
 extern BYTE g_pMapCursorShifts[2][CROSS_SIDE_COUNT][2];
 
 UWORD getMapCrossX(
-	IN UBYTE ubCrossXIndex
+	UBYTE ubCrossXIndex
 );
 
 UWORD getMapCrossY(
-	IN UBYTE ubCrossXIndex,
-	IN UBYTE ubCrossXIndex
+	UBYTE ubCrossXIndex,
+	UBYTE ubCrossYIndex
 );
 
 BYTE getMapShiftX(
-	IN UBYTE ubMapCursorX,
-	IN UBYTE ubCrossSide
+	UBYTE ubMapCursorX,
+	UBYTE ubCrossSide
 );
 
 BYTE getMapShiftY(
-	IN UBYTE ubMapCursorX,
-	IN UBYTE ubCrossSide
+	UBYTE ubMapCursorX,
+	UBYTE ubCrossSide
 );
 
 UBYTE getRowParity(
-	IN UBYTE ubMapCursorX
+	UBYTE ubMapCursorX
 );
 
 UBYTE getMapNeighborX(
-	IN UBYTE ubMapCursorX,
-	IN UBYTE ubCrossSide
+	UBYTE ubMapCursorX,
+	UBYTE ubCrossSide
 );
 
 UBYTE getMapNeighborY(
-	IN UBYTE ubMapCursorX,
-	IN UBYTE ubMapCursorY,
-	IN UBYTE ubCrossSide
+	UBYTE ubMapCursorX,
+	UBYTE ubMapCursorY,
+	UBYTE ubCrossSide
 );
 
 UBYTE getMapNeighborXRestrictive(
-	IN UBYTE ubMapCursorX,
-	IN UBYTE ubCrossSide
+	UBYTE ubMapCursorX,
+	UBYTE ubCrossSide
 );
 
 UBYTE getMapNeighborYRestrictive(
-	IN UBYTE ubMapCursorX,
-	IN UBYTE ubMapCursorY,
-	IN UBYTE ubCrossSide
+	UBYTE ubMapCursorX,
+	UBYTE ubMapCursorY,
+	UBYTE ubCrossSide
 );
+
+UBYTE isMapEmpty();
 
 void drawMap();
 void undrawMap();
 
 void drawMapCross(
-	IN UBYTE ubCrossXIndex,
-	IN UBYTE ubCrossYIndex
+	UBYTE ubCrossXIndex,
+	UBYTE ubCrossYIndex
 );
 
 void undrawMapCross(
-	IN UBYTE ubCrossXIndex,
-	IN UBYTE ubCrossYIndex
+	UBYTE ubCrossXIndex,
+	UBYTE ubCrossYIndex
 );
 
 void drawMapStartPoint();
 void undrawMapStartPoint();
-void drawMapDestinationPoint();
-void undrawMapDestinationPoint();
+void drawMapFinishPoint();
+void undrawMapFinishPoint();
 
 UBYTE saveMapToFile(
-	IN char *szFilePath
+	char *szFilePath
 );
 
 UBYTE loadMapFromFile(
-	IN char *szFilePath
+	char *szFilePath
 );
 
 #endif

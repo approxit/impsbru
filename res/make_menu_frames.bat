@@ -1,1 +1,0 @@
-bitmap_conv.exe ../data/impsbru.plt menu_frames/logo.png -o ../data/menu_frames/logo.bm -mo ../data/menu_frames/logo.msk -mc #FF00FF

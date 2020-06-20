@@ -21,15 +21,15 @@ or compatible Amiga emulator like [WinUAE](http://www.winuae.net/).
 
 ### Installing
 
-Copy the [latest game release](https://github.com/approxit/impsbru/releases) archive and extract to directory that Amiga can load. The `bin` and `data` directories must coexist as given. 
+Copy the [latest game release](https://github.com/approxit/impsbru/releases) archive and extract to directory that Amiga can load. The `impsbru` and `data` must coexist as given. 
 
 ### Running the game
 
-Game must be stared from main executable file located in `bin/impsbru`.
+Game must be stared from main executable file `impsbru`.
 In AmigaDOS CLI you can use following commands:
 
 ```
-1> cd impsbru/bin
+1> cd impsbru
 1> impsbru
 ``` 
 
@@ -74,9 +74,8 @@ In AmigaDOS CLI you can use following commands:
 
 ## Built With
 
-* [Amiga C Engine](https://github.com/approxit/ACE) - game engine
-* [Amiga C Engine CLI](https://github.com/approxit/ace-cli) - build tool
-* [amiga-dev](https://github.com/kusma/amiga-dev) - VBCC+VASM+VLINK development environment
+* [Amiga C Engine](https://github.com/AmigaPorts/ACE) - game engine
+* [amiga-gcc](https://github.com/bebbo/amiga-gcc) - GCC development environment
 * [Photoshop](http://www.adobe.com/products/photoshop.html) - graphics editor
 
 ## Versioning

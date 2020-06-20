@@ -2,31 +2,30 @@
 #define GUARD_IMPSBRU_ATLAS_H
 
 #include <ace/utils/bitmap.h>
-#include <ace/utils/bitmapmask.h>
 
 void createAtlasFile(
-	INOUT tBitMap **pBitMapAtlas,
-	IN UBYTE ubAtlasIndex,
-	IN char *szBitMapFilePath
+	tBitMap **pBitMapAtlas,
+	UBYTE ubAtlasIndex,
+	char *szBitMapFilePath
 );
 
 void destroyAtlasFiles(
-	INOUT tBitMap **pBitMapAtlas,
-	IN UBYTE ubAtlasCount
+	tBitMap **pBitMapAtlas,
+	UBYTE ubAtlasCount
 );
 
 void createAtlasFileWithMask(
-	INOUT tBitMap **pBitMapAtlas,
-	INOUT tBitmapMask **pBitMapMaskAtlas,
-	IN UBYTE ubAtlasIndex,
-	IN char *szBitMapFilePath,
-	IN char *szBitMapMaskFilePath
+	tBitMap **pBitMapAtlas,
+	tBitMap **pBitMapMaskAtlas,
+	UBYTE ubAtlasIndex,
+	char *szBitMapFilePath,
+	char *szBitMapMaskFilePath
 );
 
 void destroyAtlasFilesWithMask(
-	INOUT tBitMap **pBitMapAtlas,
-	INOUT tBitmapMask **pBitMapMaskAtlas,
-	IN UBYTE ubAtlasCount
+	tBitMap **pBitMapAtlas,
+	tBitMap **pBitMapMaskAtlas,
+	UBYTE ubAtlasCount
 );
 
 #endif

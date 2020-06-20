@@ -1,8 +1,7 @@
 #include "map.h"
 
-#include <stdio.h>
-
 #include <ace/managers/blit.h>
+#include <ace/managers/system.h>
 
 #include "cross.h"
 #include "cube.h"
@@ -12,9 +11,9 @@ UBYTE g_pMapData[MAP_WIDTH][MAP_HEIGHT] = {0};
 UBYTE g_ubMapStartPointX = MAP_WIDTH;
 UBYTE g_ubMapStartPointY = MAP_HEIGHT;
 UBYTE g_ubMapStartPointCrossSide = 0;
-UBYTE g_ubMapDestinationPointX = MAP_WIDTH;
-UBYTE g_ubMapDestinationPointY = MAP_HEIGHT;
-UBYTE g_ubMapDestinationPointCrossSide = 0;
+UBYTE g_ubMapFinishPointX = MAP_WIDTH;
+UBYTE g_ubMapFinishPointY = MAP_HEIGHT;
+UBYTE g_ubMapFinishPointCrossSide = 0;
 BYTE g_pMapCursorShifts[2][CROSS_SIDE_COUNT][2] = {
 	{
    		{0, -1}, // N
@@ -104,6 +103,18 @@ UBYTE getMapNeighborY(UBYTE ubMapCursorX, UBYTE ubMapCursorY, UBYTE ubCrossSide)
 	return ubMapCursorY;
 }
 
+UBYTE isMapEmpty() {
+	for (UBYTE ubX = 0; ubX < MAP_WIDTH; ++ubX) {
+		for (UBYTE ubY = 0; ubY < MAP_HEIGHT; ++ubY) {
+			if (g_pMapData[ubX][ubY]) {
+				return 0;
+			}
+		}
+	}
+
+	return 1;
+}
+
 void drawMap() {
 	for (UBYTE ubCrossXIndex = 0; ubCrossXIndex < MAP_WIDTH; ++ubCrossXIndex) {
 		for (UBYTE ubCrossYIndex = 0; ubCrossYIndex < MAP_HEIGHT; ++ubCrossYIndex) {
@@ -112,12 +123,12 @@ void drawMap() {
 	}
 
 	drawMapStartPoint();
-	drawMapDestinationPoint();
+	drawMapFinishPoint();
 }
 
 void undrawMap() {
 	blitRect(
-		g_pBufferManager->pBuffer, 0, MAP_Y_OFFSET,
+		g_pBufferManager->pBack, 0, MAP_Y_OFFSET,
 		MAP_WIDTH * CROSS_X_SHIFT, MAP_HEIGHT * CROSS_Y_SHIFT + CROSS_ODD_Y_SHIFT,
 		0
 	);
@@ -164,83 +175,109 @@ void undrawMapStartPoint() {
 	}
 }
 
-void drawMapDestinationPoint() {
-	if ((g_ubMapDestinationPointX != MAP_WIDTH) && (g_ubMapDestinationPointY != MAP_HEIGHT) && g_pMapData[g_ubMapDestinationPointX][g_ubMapDestinationPointY] && !(g_ubMapDestinationPointCrossSide & 1)) {
+void drawMapFinishPoint() {
+	if ((g_ubMapFinishPointX != MAP_WIDTH) && (g_ubMapFinishPointY != MAP_HEIGHT) && g_pMapData[g_ubMapFinishPointX][g_ubMapFinishPointY] && !(g_ubMapFinishPointCrossSide & 1)) {
 		drawDestinationPoint(
-			getMapCrossX(g_ubMapDestinationPointX),
-			getMapCrossY(g_ubMapDestinationPointX, g_ubMapDestinationPointY),
-			g_ubMapDestinationPointCrossSide
+			getMapCrossX(g_ubMapFinishPointX),
+			getMapCrossY(g_ubMapFinishPointX, g_ubMapFinishPointY),
+			g_ubMapFinishPointCrossSide
 		);
 	}
 }
 
-void undrawMapDestinationPoint() {
-	if ((g_ubMapDestinationPointX != MAP_WIDTH) && (g_ubMapDestinationPointY != MAP_HEIGHT) && !(g_ubMapDestinationPointCrossSide & 1)) {
+void undrawMapFinishPoint() {
+	if ((g_ubMapFinishPointX != MAP_WIDTH) && (g_ubMapFinishPointY != MAP_HEIGHT) && !(g_ubMapFinishPointCrossSide & 1)) {
 		undrawDestinationPoint(
-			getMapCrossX(g_ubMapDestinationPointX),
-			getMapCrossY(g_ubMapDestinationPointX, g_ubMapDestinationPointY)
+			getMapCrossX(g_ubMapFinishPointX),
+			getMapCrossY(g_ubMapFinishPointX, g_ubMapFinishPointY)
 		);
 
-		if (g_pMapData[g_ubMapDestinationPointX][g_ubMapDestinationPointY]) {
-			drawMapCross(g_ubMapDestinationPointX, g_ubMapDestinationPointY);
+		if (g_pMapData[g_ubMapFinishPointX][g_ubMapFinishPointY]) {
+			drawMapCross(g_ubMapFinishPointX, g_ubMapFinishPointY);
 		}
 	}
 }
 
 UBYTE saveMapToFile(char *szFilePath) {
-	logWrite("Saving %s... ", szFilePath);
-	FILE *pFile = fopen(szFilePath, "wb");
+	logBlockBegin("saveMapToFile(szFilePath: %s)", szFilePath);
+
+	systemUse();
+
+	tFile *pFile = fileOpen(szFilePath, "wb");
 	if (!pFile) {
-		logWrite("ERROR: can\'t open file!\n");
+		systemUnuse();
+
+		logWrite("ERROR: can't open file!\n");
+		logBlockEnd("saveMapToFile()");
+
 		return 0;
 	}
 
-	fputc(MAP_WIDTH, pFile);
-	fputc(MAP_HEIGHT, pFile);
-	fputc(g_ubMapStartPointX, pFile);
-	fputc(g_ubMapStartPointY, pFile);
-	fputc(g_ubMapStartPointCrossSide, pFile);
-	fputc(g_ubMapDestinationPointX, pFile);
-	fputc(g_ubMapDestinationPointY, pFile);
-	fputc(g_ubMapDestinationPointCrossSide, pFile);
+	UBYTE ubMapWidth = MAP_WIDTH;
+	UBYTE ubMapHeight = MAP_HEIGHT;
+	fileWrite(pFile, &ubMapWidth, sizeof(ubMapWidth));
+	fileWrite(pFile, &ubMapHeight, sizeof(ubMapHeight));
+	fileWrite(pFile, &g_ubMapStartPointX, sizeof(g_ubMapStartPointX));
+	fileWrite(pFile, &g_ubMapStartPointY, sizeof(g_ubMapStartPointY));
+	fileWrite(pFile, &g_ubMapStartPointCrossSide, sizeof(g_ubMapStartPointCrossSide));
+	fileWrite(pFile, &g_ubMapFinishPointX, sizeof(g_ubMapFinishPointX));
+	fileWrite(pFile, &g_ubMapFinishPointY, sizeof(g_ubMapFinishPointY));
+	fileWrite(pFile, &g_ubMapFinishPointCrossSide, sizeof(g_ubMapFinishPointCrossSide));
 
-	fwrite(g_pMapData, CROSS_BYTE_SIZE, MAP_WIDTH * MAP_HEIGHT, pFile);
+	fileWrite(pFile, g_pMapData, CROSS_BYTE_SIZE * MAP_WIDTH * MAP_HEIGHT);
 
-	fclose(pFile);
+	fileClose(pFile);
 
-	logWrite("done\n");
+	systemUnuse();
+
+	logBlockEnd("saveMapToFile()");
 
 	return 1;
 }
 
 UBYTE loadMapFromFile(char *szFilePath) {
-	logWrite("Loading %s... ", szFilePath);
-	FILE *pFile = fopen(szFilePath, "rb");
+	logBlockBegin("loadMapFromFile(szFilePath: %s)", szFilePath);
+
+	systemUse();
+
+	tFile *pFile = fileOpen(szFilePath, "rb");
 	if (!pFile) {
-		logWrite("ERROR: can\'t open file!\n");
+		systemUnuse();
+
+		logWrite("ERROR: can't open file!\n");
+		logBlockEnd("loadMapFromFile()");
+
 		return 0;
 	}
 
-	UBYTE ubMapWidth = fgetc(pFile);
-	UBYTE ubMapHeight = fgetc(pFile);
+	UBYTE ubMapWidth;
+	UBYTE ubMapHeight;
+	fileRead(pFile, &ubMapWidth, sizeof(ubMapWidth));
+	fileRead(pFile, &ubMapHeight, sizeof(ubMapHeight));
 
 	if ((ubMapWidth != MAP_WIDTH) || (ubMapHeight != MAP_HEIGHT)) {
+		systemUnuse();
+
 		logWrite("ERROR: Map dimensions mismatch! Map: %ux%u Engine: %ux%u\n", ubMapWidth, ubMapHeight, MAP_WIDTH, MAP_HEIGHT);
+		logBlockEnd("loadMapFromFile()");
+
 		return 0;
 	}
 
-	g_ubMapStartPointX = fgetc(pFile);
-	g_ubMapStartPointY = fgetc(pFile);
-	g_ubMapStartPointCrossSide = fgetc(pFile);
-	g_ubMapDestinationPointX = fgetc(pFile);
-	g_ubMapDestinationPointY = fgetc(pFile);
-	g_ubMapDestinationPointCrossSide = fgetc(pFile);
+	fileRead(pFile, &g_ubMapStartPointX, sizeof(g_ubMapStartPointX));
+	fileRead(pFile, &g_ubMapStartPointY, sizeof(g_ubMapStartPointY));
+	fileRead(pFile, &g_ubMapStartPointCrossSide, sizeof(g_ubMapStartPointCrossSide));
+	fileRead(pFile, &g_ubMapFinishPointX, sizeof(g_ubMapFinishPointX));
+	fileRead(pFile, &g_ubMapFinishPointY, sizeof(g_ubMapFinishPointY));
+	fileRead(pFile, &g_ubMapFinishPointCrossSide, sizeof(g_ubMapFinishPointCrossSide));
 
-	fread(g_pMapData, CROSS_BYTE_SIZE, MAP_WIDTH * MAP_HEIGHT, pFile);
+	fileRead(pFile, g_pMapData, CROSS_BYTE_SIZE * MAP_WIDTH * MAP_HEIGHT);
 
-	fclose(pFile);
+	fileClose(pFile);
 
-	logWrite("done\n");
+	systemUnuse();
+
+	logBlockEnd("loadMapFromFile()");
 
 	return 1;
 }

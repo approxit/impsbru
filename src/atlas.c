@@ -1,7 +1,7 @@
 #include "atlas.h"
 
 void createAtlasFile(tBitMap *pBitMapAtlas[], UBYTE ubAtlasIndex, char *szBitMapFilePath) {
-	pBitMapAtlas[ubAtlasIndex] = bitmapCreateFromFile(szBitMapFilePath);
+	pBitMapAtlas[ubAtlasIndex] = bitmapCreateFromFile(szBitMapFilePath, 0);
 }
 
 void destroyAtlasFiles(tBitMap *pBitMapAtlas[], UBYTE ubAtlasCount) {
@@ -11,12 +11,12 @@ void destroyAtlasFiles(tBitMap *pBitMapAtlas[], UBYTE ubAtlasCount) {
 	}
 }
 
-void createAtlasFileWithMask(tBitMap *pBitMapAtlas[], tBitmapMask *pBitMapMaskAtlas[], UBYTE ubAtlasIndex, char *szBitMapFilePath, char *szBitMapMaskFilePath) {
-	pBitMapAtlas[ubAtlasIndex] = bitmapCreateFromFile(szBitMapFilePath);
-	pBitMapMaskAtlas[ubAtlasIndex] = bitmapMaskCreateFromFile(szBitMapMaskFilePath);
+void createAtlasFileWithMask(tBitMap *pBitMapAtlas[], tBitMap *pBitMapMaskAtlas[], UBYTE ubAtlasIndex, char *szBitMapFilePath, char *szBitMapMaskFilePath) {
+	pBitMapAtlas[ubAtlasIndex] = bitmapCreateFromFile(szBitMapFilePath, 0);
+	pBitMapMaskAtlas[ubAtlasIndex] = bitmapCreateFromFile(szBitMapMaskFilePath, 0);
 }
 
-void destroyAtlasFilesWithMask(tBitMap *pBitMapAtlas[], tBitmapMask *pBitMapMaskAtlas[], UBYTE ubAtlasCount) {
+void destroyAtlasFilesWithMask(tBitMap *pBitMapAtlas[], tBitMap *pBitMapMaskAtlas[], UBYTE ubAtlasCount) {
 	UBYTE ubAtlasIndex = ubAtlasCount;
 	while (ubAtlasIndex--) {
 		if (pBitMapAtlas[ubAtlasIndex]) {
@@ -24,7 +24,7 @@ void destroyAtlasFilesWithMask(tBitMap *pBitMapAtlas[], tBitmapMask *pBitMapMask
 		}
 
 		if (pBitMapMaskAtlas[ubAtlasIndex]) {
-			bitmapMaskDestroy(pBitMapMaskAtlas[ubAtlasIndex]);
+			bitmapDestroy(pBitMapMaskAtlas[ubAtlasIndex]);
 		}
 	}
 }

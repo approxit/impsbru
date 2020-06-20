@@ -6,7 +6,7 @@
 #include "atlas.h"
 
 tBitMap *g_pCrossBitMapAtlas[CROSS_ATLAS_SIZE] = {0};
-tBitmapMask *g_pCrossBitMapMaskAtlas[CROSS_ATLAS_SIZE] = {0};
+tBitMap *g_pCrossBitMapMaskAtlas[CROSS_ATLAS_SIZE] = {0};
 
 UBYTE getCrossSideState(UBYTE ubCrossData, UBYTE ubCrossSide) {
 	return (ubCrossData >> ubCrossSide) & 1;
@@ -17,24 +17,24 @@ UBYTE getOppositeCrossSide(UBYTE ubCrossSide) {
 }
 
 void createCrossAtlas() {
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_A, "/data/cross_frames/a.bm", "/data/cross_frames/a.msk");
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_B, "/data/cross_frames/b.bm", "/data/cross_frames/b.msk");
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_C, "/data/cross_frames/c.bm", "/data/cross_frames/c.msk");
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_D, "/data/cross_frames/d.bm", "/data/cross_frames/d.msk");
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_E, "/data/cross_frames/e.bm", "/data/cross_frames/e.msk");
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_F, "/data/cross_frames/f.bm", "/data/cross_frames/f.msk");
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_A_FINAL, "/data/cross_frames/a_final.bm", "/data/cross_frames/a_final.msk");
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_C_FINAL, "/data/cross_frames/c_final.bm", "/data/cross_frames/c_final.msk");
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_E_FINAL, "/data/cross_frames/e_final.bm", "/data/cross_frames/e_final.msk");
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_CENTER, "/data/cross_frames/center.bm", "/data/cross_frames/center.msk");
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_CURSOR, "/data/cross_frames/cursor.bm", "/data/cross_frames/cursor.msk");
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_CLEANUP, "/data/cross_frames/cleanup.bm", "/data/cross_frames/cleanup.msk");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_A, "data/cross_frames/a.bm", "data/cross_frames/a_mask.bm");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_B, "data/cross_frames/b.bm", "data/cross_frames/b_mask.bm");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_C, "data/cross_frames/c.bm", "data/cross_frames/c_mask.bm");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_D, "data/cross_frames/d.bm", "data/cross_frames/d_mask.bm");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_E, "data/cross_frames/e.bm", "data/cross_frames/e_mask.bm");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_F, "data/cross_frames/f.bm", "data/cross_frames/f_mask.bm");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_A_FINAL, "data/cross_frames/a_final.bm", "data/cross_frames/a_final_mask.bm");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_C_FINAL, "data/cross_frames/c_final.bm", "data/cross_frames/c_final_mask.bm");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_E_FINAL, "data/cross_frames/e_final.bm", "data/cross_frames/e_final_mask.bm");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_CENTER, "data/cross_frames/center.bm", "data/cross_frames/center_mask.bm");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_CURSOR, "data/cross_frames/cursor.bm", "data/cross_frames/cursor_mask.bm");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_CLEANUP, "data/cross_frames/cleanup.bm", "data/cross_frames/cleanup_mask.bm");
 
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_DESTINATION_OFFSET + CROSS_SIDE_A, "/data/cross_frames/a_final.bm", "/data/cross_frames/a_final.msk");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_DESTINATION_OFFSET + CROSS_SIDE_A, "data/cross_frames/a_final.bm", "data/cross_frames/a_final_mask.bm");
 	/* Cross side A destination is not visible so it's disabled */
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_DESTINATION_OFFSET + CROSS_SIDE_C, "/data/cross_frames/c_final.bm", "/data/cross_frames/c_final.msk");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_DESTINATION_OFFSET + CROSS_SIDE_C, "data/cross_frames/c_final.bm", "data/cross_frames/c_final_mask.bm");
 	/* Cross side D destination is not visible so it's disabled */
-	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_DESTINATION_OFFSET + CROSS_SIDE_E, "/data/cross_frames/e_final.bm", "/data/cross_frames/e_final.msk");
+	createAtlasFileWithMask(g_pCrossBitMapAtlas, g_pCrossBitMapMaskAtlas, CROSS_SIDE_DESTINATION_OFFSET + CROSS_SIDE_E, "data/cross_frames/e_final.bm", "data/cross_frames/e_final_mask.bm");
 	/* Cross side F destination is not visible so it's disabled */
 }
 
@@ -88,8 +88,8 @@ void undrawDestinationPoint(UWORD uwX, UWORD uwY) {
 void drawCrossAtlasIndex(UWORD uwX, UWORD uwY, UBYTE ubAtlasIndex) {
 	blitCopyMask(
 		g_pCrossBitMapAtlas[ubAtlasIndex], 0, 0,
-		g_pBufferManager->pBuffer, uwX, uwY,
+		g_pBufferManager->pBack, uwX, uwY,
 		CROSS_WIDTH, CROSS_HEIGHT,
-		g_pCrossBitMapMaskAtlas[ubAtlasIndex]->pData
+		(const UWORD *) g_pCrossBitMapMaskAtlas[ubAtlasIndex]->Planes[0]
 	);
 }

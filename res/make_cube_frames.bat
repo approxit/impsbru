@@ -1,1 +1,0 @@
-bitmap_conv.exe ../data/impsbru.plt cube_frames/cube.png -o ../data/cube_frames/cube.bm -mo ../data/cube_frames/cube.msk -mc #FF00FF

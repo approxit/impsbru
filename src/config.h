@@ -54,6 +54,7 @@
 #define CUBE_DEPTH_BOTTOM 0
 #define CUBE_DEPTH_MIDDLE 1
 #define CUBE_DEPTH_TOP 2
+#define CUBE_DEPTH_SIZE 2
 
 #define MAP_WIDTH 6
 #define MAP_HEIGHT 4
